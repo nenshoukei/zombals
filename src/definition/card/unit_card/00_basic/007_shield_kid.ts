@@ -1,32 +1,32 @@
-import { HasteEffect } from '@/definition';
+import { GuardianEffect } from '@/definition/effect/016_guardian_effect';
 import { effectRegistry } from '@/registry';
 import { CardJob, CardPack, CardRarity, CardType, FieldUnitState, GameContext, UnitKind } from '@/types';
 import { BaseUnitCardDefinition } from '@/types/definition/unit_card';
 
-export class Furrat extends BaseUnitCardDefinition {
-  static readonly id = this.generateId(CardPack.BASIC, CardType.UNIT, 5);
+export class ShieldKid extends BaseUnitCardDefinition {
+  static readonly id = this.generateId(CardPack.BASIC, CardType.UNIT, 4);
 
   constructor() {
     super({
-      id: Furrat.id,
+      id: ShieldKid.id,
       name: {
-        ja: 'ファーラット',
+        ja: 'シールドこぞう',
       },
       description: {
-        ja: '*速攻*',
+        ja: '*におうだち*',
       },
-      cost: 1,
+      cost: 2,
       job: CardJob.COMMON,
       rarity: CardRarity.NORMAL,
       pack: CardPack.BASIC,
-      power: 1,
-      maxHP: 1,
+      power: 2,
+      maxHP: 2,
       kind: UnitKind.NONE,
     });
   }
 
   onFieldUnitCreated(ctx: GameContext, unit: FieldUnitState): void {
     const unitCtx = ctx.field.getFieldUnitContext(unit);
-    unitCtx.addEffectDef(effectRegistry.getByDef(HasteEffect), null);
+    unitCtx.addEffectDef(effectRegistry.getByDef(GuardianEffect), null);
   }
 }

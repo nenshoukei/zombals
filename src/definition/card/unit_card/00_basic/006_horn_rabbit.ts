@@ -3,23 +3,23 @@ import { effectRegistry } from '@/registry';
 import { CardJob, CardPack, CardRarity, CardType, FieldUnitState, GameContext, UnitKind } from '@/types';
 import { BaseUnitCardDefinition } from '@/types/definition/unit_card';
 
-export class Furrat extends BaseUnitCardDefinition {
-  static readonly id = this.generateId(CardPack.BASIC, CardType.UNIT, 5);
+export class HornRabbit extends BaseUnitCardDefinition {
+  static readonly id = this.generateId(CardPack.BASIC, CardType.UNIT, 6);
 
   constructor() {
     super({
-      id: Furrat.id,
+      id: HornRabbit.id,
       name: {
-        ja: 'ファーラット',
+        ja: 'いっかくうさぎ',
       },
       description: {
         ja: '*速攻*',
       },
-      cost: 1,
+      cost: 2,
       job: CardJob.COMMON,
       rarity: CardRarity.NORMAL,
       pack: CardPack.BASIC,
-      power: 1,
+      power: 2,
       maxHP: 1,
       kind: UnitKind.NONE,
     });

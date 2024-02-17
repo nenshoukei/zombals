@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id          String       @id
+  loginId     String?      @unique
+  password    String?
+  name        String
+  titleId     Int?         @db.UnsignedSmallInt
+  rank        Int          @db.UnsignedTinyInt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  gamePlayers GamePlayer[]
+  decks       Deck[]
+
+  @@index([createdAt])
+  @@index([loginId])
+}
+
+model Deck {
+  id         String   @id
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  name       String
+  job        Int      @db.UnsignedTinyInt
+  cardDefIds Json
+  isComplete Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model GameRecord {
+  id          String       @id
+  startedAt   DateTime
+  finishedAt  DateTime?
+  gamePlayers GamePlayer[]
+  first       String       @db.Char(2)
+  winner      String?      @db.Char(2)
+  seed        Int          @db.UnsignedInt
+  actions     Json
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([createdAt])
+  @@index([startedAt])
+  @@index([finishedAt])
+}
+
+model GamePlayer {
+  id          String       @id
+  position    String       @db.Char(2)
+  user        User         @relation(fields: [userId], references: [id])
+  userId      String
+  name        String
+  titleId     Int?         @db.UnsignedSmallInt
+  rank        Int          @db.UnsignedTinyInt
+  job         Int          @db.UnsignedTinyInt
+  cardDefIds  Json
+  gameRecords GameRecord[]
+
+  @@index([userId])
+}

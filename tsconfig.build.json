@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "ES2022",
+    "target": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": false,
+    "declaration": false,
+    "allowJs": true,
+    "declarationMap": false,
+    "noEmitOnError": true,
+    "types": ["vitest/globals"],
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "noEmit": false,
+    "baseUrl": ".",
+    "paths": {
+      "$/*": ["client/*"],
+      "@/*": ["src/*"]
+    },
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts", "client/**/*.ts", "client/**/*.tsx", "*.ts", "*.js"],
+  "exclude": ["node_modules", "dist"]
+}

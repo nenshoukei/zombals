@@ -1,0 +1,33 @@
+{
+  "spinnerStream": "stdout",
+  "progressStream": "stdout",
+  "reasonerStream": "stderr",
+  "options": [
+    {
+      "mode": "create",
+      "project": "./tsconfig.json",
+      "exportFilename": "index.ts",
+      "useBanner": true,
+      "overwrite": true,
+      "backup": false,
+      "skipEmptyDir": false,
+      "startFrom": "src/definition",
+      "include": [
+        "src/definition/**/*.ts"
+      ]
+    },
+    {
+      "mode": "create",
+      "project": "./tsconfig.json",
+      "exportFilename": "index.ts",
+      "useBanner": true,
+      "overwrite": true,
+      "backup": false,
+      "skipEmptyDir": false,
+      "startFrom": "src/types",
+      "include": [
+        "src/types/**/*.ts"
+      ]
+    }
+  ]
+}

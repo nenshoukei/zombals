@@ -12,6 +12,7 @@ export * from './014_counter_none_effect';
 export * from './015_double_attack_effect';
 export * from './016_guardian_effect';
 export * from './017_haste_effect';
+export * from './018_snipe_effect';
 export * from './020_fortune_true_effect';
 export * from './021_fortune_super_true_effect';
 export * from './030_sword_enhance_floor_effect';

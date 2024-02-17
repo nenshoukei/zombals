@@ -1,6 +1,6 @@
 import { Id } from '../common';
 import { BuildingCardDefinition, FloorDefinition, UnitCardDefinition } from '../definition/base';
-import { CellPosition, LeaderCellPosition, LeaderPosition, SideRowPosition, TargetLeader, TargetUnit } from '../field';
+import { AttackTarget, CellPosition, LeaderCellPosition, LeaderPosition, SideRowPosition, TargetLeader, TargetUnit } from '../field';
 import {
   BuildingCardState,
   FieldBuildingState,
@@ -90,6 +90,30 @@ export interface FieldContext {
    * @returns 存在していれば AttackableContext。いなければ `null`。
    */
   getAttackTargetByTarget(target: TargetLeader | TargetUnit): AttackableContext | null;
+
+  /**
+   * 攻撃対象がブロック (リーダーの場合はウォール) されているかどうか判定する。
+   *
+   * @param target 攻撃対象
+   * @returns ブロックされていれば `true`、されていなければ `false`
+   */
+  isAttackTargetBlocked(target: AttackTarget): boolean;
+
+  /**
+   * 対象リーダーのフィールドにウォールが形成されているかどうか判定する。
+   *
+   * @param position 対象リーダーの位置
+   * @returns ウォールが形成されていれば `true`、されていなければ `false`
+   */
+  isWallExistingOnLeader(position: LeaderPosition): boolean;
+
+  /**
+   * 対象ユニットがブロックされているかどうか判定する。
+   *
+   * @param position 対象ユニットの位置
+   * @returns ブロックされていれば `true`、されていなければ `false`
+   */
+  isUnitBlocked(position: CellPosition): boolean;
 
   /**
    * 敵・味方問わず全てのフィールドユニットのコンテキストを取得する。

@@ -23,9 +23,10 @@ export interface AttackableContext {
   /**
    * 攻撃可能かどうかを判定する。
    *
+   * @param target 攻撃対象
    * @returns 攻撃可能なら `true`。不可なら `false`。
    */
-  canAttack(): boolean;
+  canAttack(target: AttackTarget): boolean;
 
   /**
    * 攻撃する。

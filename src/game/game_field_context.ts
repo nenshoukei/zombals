@@ -4,10 +4,13 @@ import { GameFloorContext } from './game_floor_context';
 import { cardRegistry, floorRegistry } from '@/registry';
 import {
   AttackableContext,
+  AttackTarget,
   BuildingCardDefinition,
   BuildingCardState,
   BY_LEADER,
+  CELL_TO_COLUMN_TYPE,
   CELL_TO_LEADER,
+  CELL_TO_OPPOSITE_CELL,
   CellPosition,
   CELLS,
   FieldBuildingContext,
@@ -153,6 +156,34 @@ export class GameFieldContext implements FieldContext {
       if (!cell) return null;
       return this.getAttackTargetAt(cell);
     }
+  }
+
+  isAttackTargetBlocked(target: AttackTarget): boolean {
+    if (target.type === TargetType.LEADER) {
+      // リーダーの場合はウォールがあるかどうか
+      return this.isWallExistingOnLeader(target.position);
+    } else {
+      // ユニットの場合は前列にブロックされているかどうか
+      const unit = this.getUnitById(target.unitId);
+      return Boolean(unit && this.isUnitBlocked(unit.position));
+    }
+  }
+
+  isWallExistingOnLeader(position: LeaderPosition): boolean {
+    return BY_LEADER[position].allySideRows.every((sideRow) =>
+      SIDE_ROW_TO_CELLS[sideRow].some((cell) => {
+        this._state.objectMap[cell]?.type === 'UNIT';
+      }),
+    );
+  }
+
+  isUnitBlocked(position: CellPosition): boolean {
+    // 前列ならブロックされない
+    if (CELL_TO_COLUMN_TYPE[position] === 'FRONT') return false;
+
+    // 後列にいて前列にユニットがいるかどうか
+    const opposite = CELL_TO_OPPOSITE_CELL[position];
+    return this.state.objectMap[opposite]?.type === 'UNIT';
   }
 
   getAllUnits(): FieldUnitContext[] {

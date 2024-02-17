@@ -5,6 +5,7 @@ import { PowerChangeEffect, PowerChangeEffectStorage } from '@/definition';
 import { CounterMinusEffect, CounterMinusEffectStorage } from '@/definition/effect/013_counter_minus_effect';
 import { CounterNoneEffect } from '@/definition/effect/014_counter_none_effect';
 import { DoubleAttackEffect } from '@/definition/effect/015_double_attack_effect';
+import { SnipeEffect } from '@/definition/effect/018_snipe_effect';
 import { badgeRegistry, cardRegistry } from '@/registry';
 import {
   AttackTarget,
@@ -590,7 +591,7 @@ export class GamePlayerContext implements PlayerContext {
     }
   }
 
-  canAttack(): boolean {
+  canAttack(target: AttackTarget): boolean {
     // 攻撃力 0 なら攻撃不可
     if (this.getCalculatedPower() === 0) return false;
 
@@ -604,6 +605,13 @@ export class GamePlayerContext implements PlayerContext {
     } else if (this.state.turnAttackCount >= 2) {
       return false;
     }
+
+    // 攻撃対象がブロック (またはウォール) されていないかチェック (ねらい撃ちは除く)
+    const snipe = this._game.findEffectByDef(SnipeEffect, this.asTarget);
+    if (!snipe && this._game.field.isAttackTargetBlocked(target)) {
+      return false;
+    }
+
     return true;
   }
 

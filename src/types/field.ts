@@ -70,6 +70,8 @@ export const zColumnPosition = z.enum(COLUMNS);
 /** 片側横行の位置 (AROWn, BROWn) */
 export type SideRowPosition = z.infer<typeof zSideRowPosition>;
 export const zSideRowPosition = z.enum(SIDE_ROWS);
+/** 縦列が前列か後列か */
+export type ColumnType = 'FRONT' | 'BACK';
 
 /**
  * 片側視点の位置リスト
@@ -136,8 +138,10 @@ export const BY_LEADER: Readonly<Record<LeaderPosition, SidePositionList>> = {
 /**
  * セル位置からリーダー位置への変換マップ
  *
+ * ```
  * CELL_TO_LEADER.A1 === 'A'
  * CELL_TO_LEADER.B3 === 'B'
+ * ```
  */
 export const CELL_TO_LEADER = Object.fromEntries([
   ...CELLS_A.map((cell) => [cell, 'A']),
@@ -147,8 +151,10 @@ export const CELL_TO_LEADER = Object.fromEntries([
 /**
  * セル位置から横行位置への変換マップ
  *
+ * ```
  * CELL_TO_ROW.A1 === 'ROW1'
  * CELL_TO_ROW.B5 === 'ROW2'
+ * ```
  */
 export const CELL_TO_ROW = Object.fromEntries([
   ...CELLS_A.map((cell, index) => [cell, ROWS[index % ROWS.length]]),
@@ -158,8 +164,10 @@ export const CELL_TO_ROW = Object.fromEntries([
 /**
  * セル位置から縦列位置への変換マップ
  *
+ * ```
  * CELL_TO_COLUMN.A1 === 'COL1'
  * CELL_TO_COLUMN.B5 === 'COL4'
+ * ```
  */
 export const CELL_TO_COLUMN = Object.fromEntries([
   ...CELLS_A.map((cell, index) => [cell, COLUMNS[Math.floor(index / ROWS.length) * 2]]),
@@ -169,8 +177,10 @@ export const CELL_TO_COLUMN = Object.fromEntries([
 /**
  * セル位置から片側横行位置への変換マップ
  *
+ * ```
  * CELL_TO_SIDE_ROW.A1 === 'AROW1'
  * CELL_TO_SIDE_ROW.B5 === 'BROW2'
+ * ```
  */
 export const CELL_TO_SIDE_ROW = Object.fromEntries([
   ...CELLS_A.map((cell, index) => [cell, 'A' + ROWS[index % ROWS.length]]),
@@ -178,10 +188,67 @@ export const CELL_TO_SIDE_ROW = Object.fromEntries([
 ]) as Readonly<Record<CellPosition, SideRowPosition>>;
 
 /**
+ * セル位置から前後列逆位置への変換マップ
+ *
+ * ```
+ * CELL_TO_OPPOSITE_CELL.A1 === 'A4'
+ * CELL_TO_OPPOSITE_CELL.B5 === 'B2'
+ * ```
+ */
+export const CELL_TO_OPPOSITE_CELL = Object.fromEntries([
+  ...CELLS.map((cell, index) => [cell, CELLS[(index + SIDE_ROWS.length) % CELLS.length]]),
+]) as Readonly<Record<CellPosition, CellPosition>>;
+
+/**
+ * セルが前列か後列か変換するマップ
+ *
+ * ```
+ * CELL_TO_COLUMN_TYPE.A1 === 'FRONT'
+ * CELL_TO_COLUMN_TYPE.B5 === 'BACK'
+ * ```
+ */
+export const CELL_TO_COLUMN_TYPE = Object.fromEntries([
+  ...CELLS.slice(0, CELLS.length / 2).map((cell) => [cell, 'FRONT']),
+  ...CELLS.slice(CELLS.length / 2).map((cell) => [cell, 'BACK']),
+]) as Readonly<Record<CellPosition, ColumnType>>;
+
+/**
+ * 縦列位置からセルのリストへの変換マップ
+ *
+ * ```
+ * COLUMN_TO_CELLS.COL1 == ['A1', 'A2', 'A3']
+ * COLUMN_TO_CELLS.COL2 == ['B1', 'B2', 'B3']
+ * ```
+ */
+export const COLUMN_TO_CELLS = {
+  COL1: ['A1', 'A2', 'A3'],
+  COL2: ['B1', 'B2', 'B3'],
+  COL3: ['A4', 'A5', 'A6'],
+  COL4: ['B4', 'B5', 'B6'],
+} as Readonly<Record<ColumnPosition, [CellPosition, CellPosition, CellPosition]>>;
+
+/**
+ * 縦列位置が前列か後列か変換するマップ
+ *
+ * ```
+ * COLUMN_TO_TYPE.COL1 === 'FRONT'
+ * COLUMN_TO_TYPE.COL4 === 'BACK'
+ * ```
+ */
+export const COLUMN_TO_TYPE = {
+  COL1: 'FRONT',
+  COL2: 'FRONT',
+  COL3: 'BACK',
+  COL4: 'BACK',
+} as Readonly<Record<ColumnPosition, ColumnType>>;
+
+/**
  * 片側横行位置から2つのセルのペアへの変換マップ
  *
+ * ```
  * SIDE_ROW_TO_CELLS.AROW1 == ['A1', 'A4']
  * SIDE_ROW_TO_CELLS.BROW2 == ['B2', 'B5']
+ * ```
  */
 export const SIDE_ROW_TO_CELLS = {
   AROW1: ['A1', 'A4'],

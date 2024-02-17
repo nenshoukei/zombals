@@ -12,6 +12,7 @@ import {
 } from '@/definition';
 import { CounterMinusEffect, CounterMinusEffectStorage } from '@/definition/effect/013_counter_minus_effect';
 import { CounterNoneEffect } from '@/definition/effect/014_counter_none_effect';
+import { SnipeEffect } from '@/definition/effect/018_snipe_effect';
 import { DarkClothEffect } from '@/definition/effect/101_dark_cloth_effect';
 import { effectRegistry } from '@/registry';
 import {
@@ -225,7 +226,7 @@ export class GameFieldUnitContext implements FieldUnitContext {
     }
   }
 
-  canAttack(): boolean {
+  canAttack(target: AttackTarget): boolean {
     // このターンに召喚されていたら攻撃不可 (速攻は除く)
     const haste = this._game.findEffectByDef(HasteEffect, this.asTarget);
     if (!haste) {
@@ -244,6 +245,13 @@ export class GameFieldUnitContext implements FieldUnitContext {
     } else if (this.state.turnAttackCount >= 2) {
       return false;
     }
+
+    // 攻撃対象がブロック (またはウォール) されていないかチェック (ねらい撃ちは除く)
+    const snipe = this._game.findEffectByDef(SnipeEffect, this.asTarget);
+    if (!snipe && this._field.isAttackTargetBlocked(target)) {
+      return false;
+    }
+
     return true;
   }
 

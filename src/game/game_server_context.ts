@@ -336,8 +336,8 @@ export class GameServerContext implements GameContext {
     if (attacker === this.ally.position) {
       // リーダーの攻撃
       const player = this.getPlayer(attacker);
-      if (!player.canAttack()) {
-        throw new GameForbiddenOperationError(`GameServerContext.playerAttack: Leader cannot attack`);
+      if (!player.canAttack(attackTarget)) {
+        throw new GameForbiddenOperationError(`GameServerContext.playerAttack: Leader cannot attack at target`);
       }
       this.getPlayer(attacker).attack(attackTarget);
     } else {
@@ -346,8 +346,8 @@ export class GameServerContext implements GameContext {
       if (!attackerUnit) {
         throw new GameRuntimeError(`GameServerContext.playerAttack: Trying to attack from no unit cell: ${attacker}`);
       }
-      if (!attackerUnit.canAttack()) {
-        throw new GameForbiddenOperationError(`GameServerContext.playerAttack: Unit cannot attack`);
+      if (!attackerUnit.canAttack(attackTarget)) {
+        throw new GameForbiddenOperationError(`GameServerContext.playerAttack: Unit cannot attack at target`);
       }
       attackerUnit.attack(attackTarget);
     }

@@ -1,6 +1,6 @@
 import { GuardianEffect } from '@/definition/effect/016_guardian_effect';
 import { effectRegistry } from '@/registry';
-import { CardJob, CardPack, CardRarity, CardType, EffectSourceType, FieldUnitState, GameContext, UnitKind } from '@/types';
+import { CardJob, CardPack, CardRarity, CardType, FieldUnitState, GameContext, UnitKind } from '@/types';
 import { BaseUnitCardDefinition } from '@/types/definition/unit_card';
 
 export class Furrat extends BaseUnitCardDefinition {
@@ -26,21 +26,7 @@ export class Furrat extends BaseUnitCardDefinition {
   }
 
   onFieldUnitCreated(ctx: GameContext, unit: FieldUnitState): void {
-    const def = effectRegistry.getByDef(GuardianEffect);
-    ctx.addEffect(
-      def.createState({
-        ctx,
-        owner: unit.owner,
-        source: {
-          type: EffectSourceType.UNIT,
-          unitId: unit.id,
-        },
-        target: {
-          type: EffectSourceType.UNIT,
-          unitId: unit.id,
-        },
-        initialStorage: null,
-      }),
-    );
+    const unitCtx = ctx.field.getFieldUnitContext(unit);
+    unitCtx.addEffectDef(effectRegistry.getByDef(GuardianEffect), null);
   }
 }

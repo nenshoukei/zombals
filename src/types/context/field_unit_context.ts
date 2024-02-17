@@ -1,3 +1,4 @@
+import { EffectDefinition } from '../definition/base';
 import { CellPosition, DamageSourceUnit, EffectEndTiming, EffectSource, TargetUnit } from '../field';
 import { FieldUnitState } from '../game_state';
 import { AttackableContext } from './attackable_context';
@@ -66,6 +67,17 @@ export interface FieldUnitContext extends FieldObjectContext, AttackableContext 
    * 移動可能かどうかを返す
    */
   isMovable(): boolean;
+
+  /**
+   * ユニットに持続効果を定義から作成して追加する。
+   *
+   * - 持続効果はユニットが自分自身に掛けるものとして扱われる。
+   * - 持続効果の終了条件は指定不可。（永続）
+   *
+   * @param effectDef 持続効果の定義
+   * @param initialStorage 初期ストレージ
+   */
+  addEffectDef<TStorage extends Storage | null, TDef extends EffectDefinition<TStorage>>(effectDef: TDef, initialStorage: TStorage): void;
 
   /**
    * スタッツを増減させる。

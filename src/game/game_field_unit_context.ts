@@ -25,6 +25,7 @@ import {
   DamageSource,
   DamageSourceType,
   DamageSourceUnit,
+  EffectDefinition,
   EffectEndTiming,
   EffectSource,
   EffectSourceType,
@@ -164,6 +165,24 @@ export class GameFieldUnitContext implements FieldUnitContext {
     if (this.isDarkClothed()) return false;
     // 移動不可エフェクトがついていなければ移動可能
     return this._game.findEffectByDef(UnmovableEffect, this.asTarget) === null;
+  }
+
+  addEffectDef<TStorage extends Storage | null, TDef extends EffectDefinition<TStorage>>(effectDef: TDef, initialStorage: TStorage): void {
+    this._game.addEffect(
+      effectDef.createState({
+        ctx: this._game,
+        owner: this.state.owner,
+        source: {
+          type: EffectSourceType.UNIT,
+          unitId: this.state.id,
+        },
+        target: {
+          type: EffectSourceType.UNIT,
+          unitId: this.state.id,
+        },
+        initialStorage,
+      }),
+    );
   }
 
   changeStats(powerDelta: number, maxHPDelta: number, source: EffectSource, endTiming?: EffectEndTiming): void {

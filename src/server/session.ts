@@ -34,7 +34,7 @@ export function writeSessionToRequest(res: Response, session: Session): void {
     maxAge: COOKIE_MAX_AGE,
     path: '/',
     domain: process.env.COOKIE_DOMAIN,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'strict',
   });
@@ -51,7 +51,7 @@ export function deleteSessionInResponse(res: Response): void {
     maxAge: 0,
     path: '/',
     domain: process.env.COOKIE_DOMAIN,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'strict',
   });

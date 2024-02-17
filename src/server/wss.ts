@@ -1,11 +1,10 @@
 import { WebSocket, WebSocketServer } from 'ws';
-import { saveGameRecord } from './db';
 import { Lobby, UserSender } from './lobby';
 import { readSessionFromRequest, Session } from './session';
 import {
-  GameForbiddenOperationError,
   RequestDeniedReason,
   SocketDisconnectReason,
+  SocketDisconnectResponse,
   UserId,
   ZombalsRequest,
   ZombalsResponse,
@@ -14,7 +13,7 @@ import {
 
 const userToSocketMap = new Map<UserId, WebSocket>();
 const userSender: UserSender = {
-  sendToUser(response, userId) {
+  sendToUser(userId, response) {
     userToSocketMap.get(userId)?.send?.(JSON.stringify(response));
   },
 };
@@ -37,13 +36,21 @@ wss.on('connection', (ws, req) => {
     return;
   }
 
-  const { userId } = session;
+  const { userId, name } = session;
+  console.debug(`WebSocketServer Connected: ${userId} (${name})`);
+
+  const send = (res: ZombalsResponse) => ws.send(JSON.stringify(res));
+  const close = (res: SocketDisconnectResponse) => ws.close(1000, JSON.stringify(res));
 
   // 配信用に WebSocket を記憶しておく
   if (userToSocketMap.has(userId)) {
     // 二重窓は不可 (新しい方を優先する)
     const oldConn = userToSocketMap.get(userId);
-    oldConn?.close(400, SocketDisconnectReason.EXCLUSIVE);
+    const response: SocketDisconnectResponse = {
+      reason: SocketDisconnectReason.EXCLUSIVE,
+      message: { ja: '他の画面で開かれました。二重で開く事はできません。' },
+    };
+    oldConn?.close(1000, JSON.stringify(response));
   }
 
   userToSocketMap.set(userId, ws);
@@ -51,11 +58,12 @@ wss.on('connection', (ws, req) => {
     userToSocketMap.delete(userId);
   });
 
-  const send = (res: ZombalsResponse) => ws.send(JSON.stringify(res));
-
   ws.on('message', async (data) => {
     if (!session) {
-      ws.close(403, SocketDisconnectReason.NOT_AUTHORIZED);
+      close({
+        reason: SocketDisconnectReason.NOT_AUTHORIZED,
+        message: { ja: '認証されていません。' },
+      });
       return;
     }
 
@@ -63,86 +71,47 @@ wss.on('connection', (ws, req) => {
     try {
       request = zZombalsRequest.parse(JSON.parse(data.toString()));
     } catch (e) {
-      console.warn('Bad request:', data.toString(), e);
+      console.warn('WebSocketServer Bad message:', data.toString(), e);
       return;
     }
 
-    switch (request.type) {
-      case 'LOBBY_ENTER': {
-        const response = await lobby.playerEnter(session.userId, request);
-        send(response);
-        break;
-      }
-      case 'LOBBY_LEAVE': {
-        await lobby.playerLeave(session.userId);
-        ws.close(200, SocketDisconnectReason.LOBBY_LEAVE);
-        break;
-      }
-      case 'GAME_START': {
-        const response = await lobby.playerStartGame(session.userId);
-        if (response.type === 'GAME_START') {
-          // ゲーム参加者のもう一方にも GAME_START を送る
-          const oppositeUserId = response.userIds[response.userIds.AL === session.userId ? 'BL' : 'AL'];
-          const conn = userToSocketMap.get(oppositeUserId);
-          if (conn) conn.send(JSON.stringify(response));
-        }
-        send(response);
-        break;
-      }
-      case 'GAME_COMMAND': {
-        const game = lobby.getGameForUserId(userId);
-        if (game) {
-          if (game.isFinished) {
-            send({
-              type: 'DENIED',
-              reason: RequestDeniedReason.GAME_ENDED,
-              commandId: request.command.id,
-            });
-          } else {
-            try {
-              game.receiveGameCommand(userId, request.command);
-            } catch (e) {
-              console.error('Error:', e);
-              send({
-                type: 'DENIED',
-                reason: e instanceof GameForbiddenOperationError ? RequestDeniedReason.FORBIDDEN : RequestDeniedReason.ERROR,
-                commandId: request.command.id,
-              });
-            }
+    console.debug('WebSocketServer Received:', request);
 
-            if (game.isFinished) {
-              // ゲームが終了したら記録する
-              lobby.gameEnd(game.record.id);
-              saveGameRecord(game.record).catch((e) => {
-                console.error('Failed to save game record:', e);
-              });
-            } else {
-              // ゲームが終了していなければコマンド受付状態とする
-              send({ type: 'READY' });
-            }
-          }
-        } else {
-          send({
-            type: 'DENIED',
-            reason: RequestDeniedReason.NO_GAME,
-            commandId: request.command.id,
-          });
+    try {
+      switch (request.type) {
+        case 'LOBBY_ENTER': {
+          await lobby.playerEnter(userId, request);
+          return;
         }
-        break;
-      }
-      case 'GAME_ACTION_DEMAND': {
-        const game = lobby.getGameForUserId(userId);
-        if (game) {
-          const position = game.record.players.AL.userId === userId ? 'AL' : 'BL';
-          const actions = game.getActionsForPlayer(position, request.fromIndex, request.toIndex);
-          send({
-            type: 'GAME_ACTION',
-            fromIndex: request.fromIndex,
-            actions,
+        case 'LOBBY_LEAVE': {
+          await lobby.playerLeave(userId);
+          close({
+            reason: SocketDisconnectReason.LOBBY_LEAVE,
+            message: { ja: 'ロビーを退室しました。' },
           });
+          return;
         }
-        break;
+        case 'GAME_START': {
+          await lobby.playerStartGame(userId);
+          return;
+        }
+        case 'GAME_COMMAND': {
+          await lobby.playerGameCommand(userId, request.command);
+          return;
+        }
+        case 'GAME_ACTION_DEMAND': {
+          await lobby.playerDemandGameAction(userId, request.fromIndex, request.toIndex);
+          return;
+        }
       }
+    } catch (e) {
+      console.error('Error:', e);
+      send({
+        type: 'DENIED',
+        reason: RequestDeniedReason.ERROR,
+        message: { ja: 'サーバーエラーが発生しました。' },
+        commandId: request.type === 'GAME_COMMAND' ? request.command.id : undefined,
+      });
     }
   });
 });

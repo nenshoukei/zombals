@@ -1,20 +1,8 @@
 import { z } from 'zod';
-import { zDeckId, zId, zTimestamp, zUserId } from '../common';
+import { zDeckId, zId, zLocaleString, zTimestamp, zUserId } from '../common';
 import { zLeaderMap } from '../field';
 import { zGameAction } from './game_action';
 import { zGameCommand } from './game_command';
-
-/**
- * ソケット切断理由
- */
-export enum SocketDisconnectReason {
-  /** 認証されていない */
-  NOT_AUTHORIZED = 'NOT_AUTHORIZED',
-  /** 二重に開かれた (古い方は切断) */
-  EXCLUSIVE = 'EXCLUSIVE',
-  /** ロビーを LEAVE した */
-  LOBBY_LEAVE = 'LOBBY_LEAVE',
-}
 
 /**
  * ロビー入室または継続リクエスト
@@ -114,6 +102,8 @@ export const zRequestDeniedResponse = z.object({
   type: z.literal('DENIED'),
   /** リクエスト不受理の理由 */
   reason: z.nativeEnum(RequestDeniedReason),
+  /** リクエスト不受理の理由メッセージ */
+  message: zLocaleString,
   /** 不受理対象のコマンドID (GameCommandRequest に対する返答の場合のみ) */
   commandId: zId.optional(),
 });
@@ -180,3 +170,24 @@ export const zZombalsResponse = z.discriminatedUnion('type', [
   zGameActionResponse,
   zGameReadyResponse,
 ]);
+
+/**
+ * ソケット切断理由
+ */
+export enum SocketDisconnectReason {
+  /** 認証されていない */
+  NOT_AUTHORIZED = 'NOT_AUTHORIZED',
+  /** 二重に開かれた (古い方は切断) */
+  EXCLUSIVE = 'EXCLUSIVE',
+  /** ロビーを LEAVE した */
+  LOBBY_LEAVE = 'LOBBY_LEAVE',
+}
+
+/**
+ * ソケット切断時のレスポンス
+ */
+export type SocketDisconnectResponse = z.infer<typeof zSocketDisconnectResponse>;
+export const zSocketDisconnectResponse = z.object({
+  reason: z.nativeEnum(SocketDisconnectReason),
+  message: zLocaleString,
+});

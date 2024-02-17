@@ -17,10 +17,11 @@ export abstract class BaseTentionSkillCardDefinition
   extends BaseCardDefinition<TentionSkillCardDefinitionInit, TentionSkillCardState>
   implements TentionSkillCardDefinition
 {
-  constructor(defs: Omit<TentionSkillCardDefinitionInit, 'type' | 'additionalTargetTypes'>) {
+  constructor(defs: Omit<TentionSkillCardDefinitionInit, 'type' | 'isToken' | 'additionalTargetTypes'>) {
     super({
       ...defs,
       type: CardType.TENTION_SKILL,
+      isToken: true,
     });
   }
 

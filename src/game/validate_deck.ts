@@ -37,6 +37,15 @@ export function validateDeck(cardDefIds: Id[], job: Job): ValidateDeckResult {
       };
     }
 
+    if (cardDef.isToken) {
+      return {
+        success: false,
+        message: {
+          ja: '使用できないカードが含まれています',
+        },
+      };
+    }
+
     if (cardDef.job !== CardJob.COMMON && cardDef.job !== job) {
       return {
         success: false,

@@ -16,10 +16,11 @@ export abstract class BaseHeroSkillCardDefinition
   extends BaseCardDefinition<HeroSkillCardDefinitionInit, HeroSkillCardState>
   implements HeroSkillCardDefinition
 {
-  constructor(defs: Omit<HeroSkillCardDefinitionInit, 'type' | 'additionalTargetTypes'>) {
+  constructor(defs: Omit<HeroSkillCardDefinitionInit, 'type' | 'isToken' | 'additionalTargetTypes'>) {
     super({
       ...defs,
       type: CardType.HERO_SKILL,
+      isToken: true,
     });
   }
 

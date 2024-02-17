@@ -31,6 +31,7 @@ import {
   GameRuntimeError,
   GameState,
   getCurrentTime,
+  getFutureTime,
   HandIndex,
   Id,
   isSameTarget,
@@ -147,7 +148,7 @@ export class GameServerContext implements GameContext {
 
     // シャッフル
     for (let i = 0; i < library.length; i++) {
-      const j = this.generateRandomInt(0, library.length);
+      const j = this.generateRandomInt(0, library.length - 1);
       [library[i], library[j]] = [library[j], library[i]];
     }
 
@@ -251,7 +252,7 @@ export class GameServerContext implements GameContext {
 
   playerMulligan(position: LeaderPosition, swapped: HandIndex[]): void {
     if (this.state.mulliganSwapped[position]) {
-      throw new GameRuntimeError('Player has already mulliganed ' + position);
+      throw new GameForbiddenOperationError('Player has already mulliganed ' + position);
     }
 
     this.state.mulliganSwapped[position] = [...swapped];
@@ -284,6 +285,9 @@ export class GameServerContext implements GameContext {
       },
       timestamp: getCurrentTime(),
     });
+
+    // 最初のターン開始
+    this.startTurn();
   }
 
   playerSurrender(position: LeaderPosition): void {
@@ -497,23 +501,14 @@ export class GameServerContext implements GameContext {
     }
   }
 
-  endCurrentTurn(): void {
+  private startTurn(turnWillEndAt?: number): void {
     this.clearTimer();
-    const turnWillEndAt = getCurrentTime() + TURN_TIMEOUT_MS;
-
-    // アクティブプレイヤー切り替え
-    this.updateState({
-      ...this.state,
-      activeLeader: this.enemy.position,
-      turn: this.state.turn + 1,
-      turnWillEndAt,
-    });
 
     this.emitAction({
       type: GameActionType.TURN_START,
       actor: this.state.activeLeader,
       turn: this.state.turn,
-      turnWillEndAt,
+      turnWillEndAt: turnWillEndAt ?? getFutureTime(TURN_TIMEOUT_MS),
       timestamp: getCurrentTime(),
     });
 
@@ -524,6 +519,20 @@ export class GameServerContext implements GameContext {
     this._timer = setTimeout(() => {
       this.checkConditions();
     }, TURN_TIMEOUT_MS);
+  }
+
+  endCurrentTurn(): void {
+    const turnWillEndAt = getFutureTime(TURN_TIMEOUT_MS);
+
+    // アクティブプレイヤー切り替え
+    this.updateState({
+      ...this.state,
+      activeLeader: this.enemy.position,
+      turn: this.state.turn + 1,
+      turnWillEndAt,
+    });
+
+    this.startTurn(turnWillEndAt);
   }
 
   selectOption(card: CardState, options: [SelectOption, SelectOption, ...SelectOption[]]): void {

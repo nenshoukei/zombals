@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useCurrentSession } from '$/hooks/useCurrentSession';
 import { useDeckList } from '$/hooks/useDeckList';
 import { cardRegistry } from '@/registry';
-import { CardDefinitionBase } from '@/types';
+import { CardDefinitionBase, ZombalsRequest, zZombalsResponse } from '@/types';
 import { cardJobNameMap, cardPackNameMap, cardRarityNameMap, Job } from '@/types/common';
 
 export default function App() {
@@ -13,14 +13,26 @@ export default function App() {
   const [messages, setMessages] = useState<string[]>([]);
 
   const connectToLobby = () => {
+    if (!decks) {
+      alert('No decks!');
+      return;
+    }
+
     const ws = new WebSocket('ws://' + location.host + '/ws');
+    const send = (req: ZombalsRequest) => ws.send(JSON.stringify(req));
+
     ws.addEventListener('open', () => {
-      setMessages([...messages, 'OPENED']);
-      ws.send(JSON.stringify({ type: 'LOBBY_ENTER', clientVersion: '1.0.0', deckId: 1 }));
+      setMessages((messages) => [...messages, 'OPENED']);
+      send({ type: 'LOBBY_ENTER', clientVersion: '1.0.0', deckId: decks[0].id });
     });
     ws.addEventListener('message', (ev) => {
-      console.log('Received', ev);
-      setMessages([...messages, 'Received: ' + ev.data]);
+      console.log('Received', ev.data);
+      setMessages((messages) => [...messages, 'Received: ' + ev.data]);
+
+      const response = zZombalsResponse.parse(JSON.parse(ev.data));
+      if (response.type === 'GAME_WAITING') {
+        send({ type: 'GAME_START' });
+      }
     });
     ws.addEventListener('error', (e) => {
       console.error(e);
@@ -149,7 +161,6 @@ export default function App() {
     const cards = [...cardRegistry.scanAll()];
     cards.sort((a, b) => a.id - b.id);
     setCards(cards);
-    console.log('CALLED');
   }, []);
 
   return (

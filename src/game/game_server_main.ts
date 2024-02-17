@@ -1,6 +1,7 @@
 import { randomInt } from 'node:crypto';
 import { GameServerContext } from './game_server_context';
 import {
+  BY_LEADER,
   CardType,
   GameAction,
   GameActionType,
@@ -58,6 +59,13 @@ export class GameServerMain {
 
   isActivePlayer(userId: UserId): boolean {
     return this._ctx.record.players[this._ctx.ally.position].userId === userId;
+  }
+
+  /**
+   * ゲーム開始
+   */
+  startGame() {
+    this._ctx.startGame();
   }
 
   /**
@@ -134,7 +142,17 @@ export class GameServerMain {
    * プレイヤー向けに action をフィルタリング
    */
   filterActionForPlayer(action: GameAction, position: LeaderPosition): GameAction {
-    if (action.type === GameActionType.DRAW) {
+    if (action.type === GameActionType.START) {
+      // 相手の手札を隠す
+      const opponent = BY_LEADER[position].enemyLeader;
+      return {
+        ...action,
+        hands: {
+          ...action.hands,
+          [opponent]: action.hands[opponent].map(() => ({ type: CardType.MASKED })),
+        },
+      };
+    } else if (action.type === GameActionType.DRAW) {
       // 自分のドローでなければ隠す
       if (action.actor !== position) {
         return {

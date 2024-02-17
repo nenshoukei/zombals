@@ -1,11 +1,15 @@
 import { uuidv7 } from 'uuidv7';
-import { getGamePlayer } from './db';
+import { getGamePlayer, saveGameRecord } from './db';
 import { CLIENT_VERSION } from '@/config/client_version';
 import { GameServerMain } from '@/game/game_server_main';
 import {
   GameActionResponse,
+  GameCommand,
+  GameForbiddenOperationError,
   GamePlayer,
   GameRecordId,
+  GameStartResponse,
+  GameWaitingResponse,
   getCurrentTime,
   getFutureTime,
   LEADERS,
@@ -17,7 +21,9 @@ import {
   ZombalsResponse,
 } from '@/types';
 
-const MATCHING_TIMEOUT_MS = 3 * 60 * 1000;
+/** マッチングのタイムアウト時間 */
+const MATCHING_TIMEOUT_MS = 30 * 1000; // 3 * 60 * 1000;
+/** ゲーム開始のタイムアウト時間 */
 const ACCEPT_TIMEOUT_MS = 10 * 1000;
 
 export interface LobbyWaitingPlayer {
@@ -27,6 +33,8 @@ export interface LobbyWaitingPlayer {
   passCode?: string;
   /** 待ち受けタイムアウト時間 (エポックミリ秒) */
   waitUntil: Timestamp;
+  /** タイマー */
+  timer: NodeJS.Timeout;
 }
 
 export interface LobbyWaitingGame {
@@ -38,10 +46,12 @@ export interface LobbyWaitingGame {
   accepted: [boolean, boolean];
   /** 承諾タイムアウト時間 (エポックミリ秒) */
   waitUntil: Timestamp;
+  /** タイマー */
+  timer: NodeJS.Timeout;
 }
 
 export interface UserSender {
-  sendToUser(response: ZombalsResponse, userId: UserId): void;
+  sendToUser(userId: UserId, response: ZombalsResponse): void;
 }
 
 export class Lobby {
@@ -61,12 +71,17 @@ export class Lobby {
     this.ongoingGameMap = new Map();
   }
 
+  private sendToUser(userId: UserId, response: ZombalsResponse): void {
+    this.userSender.sendToUser(userId, response);
+  }
+
   private maintenanceModeResponse(): RequestDeniedResponse | null {
     // メンテナンスモード中
     if (process.env.MAINTENANCE_MODE) {
       return {
         type: 'DENIED',
         reason: RequestDeniedReason.MAINTENANCE,
+        message: { ja: 'ただいまシステムのメンテナンス中です。' },
       };
     }
     return null;
@@ -77,19 +92,19 @@ export class Lobby {
    *
    * @param userId ユーザーID
    * @param req リクエスト
-   * @returns レスポンス
    */
-  async playerEnter(userId: UserId, req: LobbyEnterRequest): Promise<ZombalsResponse> {
+  async playerEnter(userId: UserId, req: LobbyEnterRequest): Promise<void> {
     // メンテナンスモード中
     const maintenance = this.maintenanceModeResponse();
-    if (maintenance) return maintenance;
+    if (maintenance) return this.sendToUser(userId, maintenance);
 
     // クライアントのバージョンチェック
     if (req.clientVersion !== CLIENT_VERSION) {
-      return {
+      return this.sendToUser(userId, {
         type: 'DENIED',
         reason: RequestDeniedReason.VERSION_MISMATCH,
-      };
+        message: { ja: 'アプリのバージョンが古くなっています。画面を更新してください。' },
+      });
     }
 
     // 既にマッチングしていないか確認
@@ -98,7 +113,7 @@ export class Lobby {
       // 開始前または進行中のゲームかどうか確認
       const response = await this.getResponseForOngoingGame(userId, gameRecordId);
       if (response) {
-        return response;
+        return this.sendToUser(userId, response);
       }
 
       // 終了済みゲームだったので続行
@@ -111,27 +126,55 @@ export class Lobby {
       const isExpired = Boolean(waiting && waiting.waitUntil <= getCurrentTime());
       if (!waiting || isExpired) {
         // タイムアウト済み
-        return {
+        return this.sendToUser(userId, {
           type: 'DENIED',
           reason: RequestDeniedReason.EXPIRED,
-        };
+          message: { ja: 'マッチングがタイムアウトしました。' },
+        });
       }
     } else {
       // プレイヤー情報とデッキ情報を取得して新しく並ぶ
-      const player = await getGamePlayer(userId, req.deckId);
-      waiting = {
-        player,
-        passCode: req.passCode,
-        waitUntil: getFutureTime(MATCHING_TIMEOUT_MS),
-      };
+      try {
+        const player = await getGamePlayer(userId, req.deckId);
+        const timer = setTimeout(() => this.timeoutMatching(userId), MATCHING_TIMEOUT_MS);
+        waiting = {
+          player,
+          passCode: req.passCode,
+          waitUntil: getFutureTime(MATCHING_TIMEOUT_MS),
+          timer,
+        };
+      } catch (e) {
+        // デッキが見つからない
+        return this.sendToUser(userId, {
+          type: 'DENIED',
+          reason: RequestDeniedReason.FORBIDDEN,
+          message: { ja: '対象のデッキが見つかりませんでした' },
+        });
+      }
       this.waitingPlayerMap.set(userId, waiting);
       this.matchedMap.delete(userId);
     }
 
-    return {
+    setImmediate(() => this.makeNextMatch());
+
+    this.sendToUser(userId, {
       type: 'LOBBY_WAITING',
       waitUntil: waiting.waitUntil,
-    };
+    });
+  }
+
+  private timeoutMatching(userId: UserId): void {
+    const waiting = this.waitingPlayerMap.get(userId);
+    if (waiting) {
+      clearTimeout(waiting.timer);
+      this.waitingPlayerMap.delete(userId);
+
+      this.sendToUser(waiting.player.userId, {
+        type: 'DENIED',
+        reason: RequestDeniedReason.EXPIRED,
+        message: { ja: 'マッチングがタイムアウトしました。' },
+      });
+    }
   }
 
   /**
@@ -140,74 +183,98 @@ export class Lobby {
    * @param userId ユーザーID
    */
   async playerLeave(userId: UserId): Promise<void> {
-    this.waitingPlayerMap.delete(userId);
+    const waiting = this.waitingPlayerMap.get(userId);
+    if (waiting) {
+      // マッチング待ちを解除
+      clearTimeout(waiting.timer);
+      this.waitingPlayerMap.delete(userId);
+    }
 
     const gameRecordId = this.matchedMap.get(userId);
     if (gameRecordId) {
+      this.matchedMap.delete(userId);
+
+      // マッチング不成立として開始前ゲームは削除
+      const waitingGame = this.waitingGameMap.get(gameRecordId);
+      if (waitingGame) {
+        clearTimeout(waitingGame.timer);
+        this.waitingGameMap.delete(gameRecordId);
+      }
+
+      // 進行中のゲームがあったら退室 = 投了扱いとする
       const ongoingGame = this.ongoingGameMap.get(gameRecordId);
       if (ongoingGame) {
         // プレイヤーの退室をゲーム内にも反映
         ongoingGame.userLeave(userId);
       }
-
-      // マッチング不成立として開始前ゲームは削除
-      this.waitingGameMap.delete(gameRecordId);
-      this.matchedMap.delete(userId);
     }
   }
 
   /**
    * プレイヤーがマッチングを受諾した
    */
-  async playerStartGame(userId: UserId): Promise<ZombalsResponse> {
+  async playerStartGame(userId: UserId): Promise<void> {
     // メンテナンスモード中
     const maintenance = this.maintenanceModeResponse();
-    if (maintenance) return maintenance;
+    if (maintenance) return this.sendToUser(userId, maintenance);
 
     // マッチ済みゲーム記録ID
     const gameRecordId = this.matchedMap.get(userId);
     if (!gameRecordId) {
       // マッチしていない
-      return {
+      return this.sendToUser(userId, {
         type: 'DENIED',
         reason: RequestDeniedReason.NO_GAME,
-      };
+        message: { ja: '試合開始に失敗しました。（不正な試合ID）' },
+      });
     }
 
     // 開始前または進行中のゲームがないか確認
     const response = await this.getResponseForOngoingGame(userId, gameRecordId);
     if (!response) {
       // 該当のゲームなし (どちらかが LEAVE してしまったか終了済み)
-      return {
+      return this.sendToUser(userId, {
         type: 'DENIED',
         reason: RequestDeniedReason.NO_GAME,
+        message: { ja: '試合開始に失敗しました。（相手が接続不良？）' },
+      });
+    }
+    if (response.type !== 'GAME_WAITING') {
+      return this.sendToUser(userId, response);
+    }
+
+    // 開始前のゲームだったら承諾済みにする
+    const waitingGame = this.waitingGameMap.get(gameRecordId)!;
+    const playerIndex = waitingGame.players[0].userId === userId ? 0 : 1;
+    if (!waitingGame.accepted[playerIndex]) {
+      waitingGame.accepted[playerIndex] = true;
+    }
+
+    // 2人とも承諾したのでゲームを開始
+    if (waitingGame.accepted[0] && waitingGame.accepted[1]) {
+      clearTimeout(waitingGame.timer);
+      this.waitingGameMap.delete(gameRecordId);
+
+      // ゲームを作成
+      const game = this.createNewGame(waitingGame);
+      this.ongoingGameMap.set(gameRecordId, game);
+
+      const startResponse: GameStartResponse = {
+        type: 'GAME_START',
+        userIds: {
+          AL: game.record.players.AL.userId,
+          BL: game.record.players.BL.userId,
+        },
       };
+
+      // ゲーム参加者両方に GAME_START を送る
+      waitingGame.players.forEach((player) => {
+        this.sendToUser(player.userId, startResponse);
+      });
+
+      // ゲーム開始
+      game.startGame();
     }
-
-    if (response.type === 'GAME_WAITING') {
-      // 開始前のゲームだったら承諾済みにする
-      const waitingGame = this.waitingGameMap.get(gameRecordId)!;
-      const playerIndex = waitingGame.players[0].userId === userId ? 0 : 1;
-      if (!waitingGame.accepted[playerIndex]) {
-        waitingGame.accepted[playerIndex] = true;
-      }
-
-      if (waitingGame.accepted[0] && waitingGame.accepted[1]) {
-        // 2人とも承諾したのでゲームを作成
-        const game = this.createNewGame(waitingGame);
-        this.waitingGameMap.delete(gameRecordId);
-        this.ongoingGameMap.set(gameRecordId, game);
-        return {
-          type: 'GAME_START',
-          userIds: {
-            AL: game.record.players.AL.userId,
-            BL: game.record.players.BL.userId,
-          },
-        };
-      }
-    }
-
-    return response;
   }
 
   private createNewGame(waitingGame: LobbyWaitingGame): GameServerMain {
@@ -226,17 +293,58 @@ export class Lobby {
           fromIndex: event.index,
         };
 
-        this.userSender.sendToUser(response, userId);
+        this.sendToUser(userId, response);
       });
     });
 
     return game;
   }
 
+  async playerGameCommand(userId: UserId, command: GameCommand): Promise<void> {
+    const game = this.getGameForUserId(userId);
+    if (!game) {
+      return this.sendToUser(userId, {
+        type: 'DENIED',
+        reason: RequestDeniedReason.NO_GAME,
+        commandId: command.id,
+        message: { ja: '参加している試合が見つかりませんでした。' },
+      });
+    }
+    if (game.isFinished) {
+      return this.sendToUser(userId, {
+        type: 'DENIED',
+        reason: RequestDeniedReason.GAME_ENDED,
+        commandId: command.id,
+        message: { ja: '試合がすでに終了しています。' },
+      });
+    }
+
+    try {
+      game.receiveGameCommand(userId, command);
+    } catch (e) {
+      console.error('Game Error:', e);
+      const isForbidden = e instanceof GameForbiddenOperationError;
+      return this.sendToUser(userId, {
+        type: 'DENIED',
+        reason: isForbidden ? RequestDeniedReason.FORBIDDEN : RequestDeniedReason.ERROR,
+        commandId: command.id,
+        message: { ja: isForbidden ? '不正な操作です。' : 'サーバーエラーが発生しました。' },
+      });
+    }
+
+    if (game.isFinished) {
+      // ゲームが終了していたら終了処理
+      this.gameEnd(game);
+    } else {
+      // ゲームが終了していなければコマンド受付状態とする
+      this.sendToUser(userId, { type: 'READY' });
+    }
+  }
+
   /**
    * ユーザーIDに対して進行中のゲームを返す
    */
-  getGameForUserId(userId: UserId): GameServerMain | null {
+  private getGameForUserId(userId: UserId): GameServerMain | null {
     const gameRecordId = this.matchedMap.get(userId);
     if (gameRecordId) {
       return this.ongoingGameMap.get(gameRecordId) ?? null;
@@ -246,15 +354,36 @@ export class Lobby {
   }
 
   /**
-   * ゲーム終了の通知
+   * ゲーム終了時
    */
-  gameEnd(gameRecordId: GameRecordId): void {
-    const game = this.ongoingGameMap.get(gameRecordId);
-    if (game) {
-      this.ongoingGameMap.delete(gameRecordId);
-      this.matchedMap.delete(game.record.players.AL.userId);
-      this.matchedMap.delete(game.record.players.BL.userId);
+  private gameEnd(game: GameServerMain): void {
+    // ゲーム内容を保存
+    saveGameRecord(game.record).catch((e) => {
+      console.error('CRITICAL Lobby Failed to save game record:', e);
+    });
+
+    this.ongoingGameMap.delete(game.gameRecordId);
+    this.matchedMap.delete(game.record.players.AL.userId);
+    this.matchedMap.delete(game.record.players.BL.userId);
+  }
+
+  async playerDemandGameAction(userId: UserId, fromIndex: number, toIndex?: number): Promise<void> {
+    const game = this.getGameForUserId(userId);
+    if (!game) {
+      return this.sendToUser(userId, {
+        type: 'DENIED',
+        reason: RequestDeniedReason.NO_GAME,
+        message: { ja: '参加している試合が見つかりませんでした。' },
+      });
     }
+
+    const position = game.record.players.AL.userId === userId ? 'AL' : 'BL';
+    const actions = game.getActionsForPlayer(position, fromIndex, toIndex);
+    this.sendToUser(userId, {
+      type: 'GAME_ACTION',
+      fromIndex,
+      actions,
+    });
   }
 
   /**
@@ -277,6 +406,7 @@ export class Lobby {
         return {
           type: 'DENIED',
           reason: RequestDeniedReason.EXPIRED,
+          message: { ja: '試合開始がタイムアウトしました。（相手が接続不良？）' },
         };
       }
     }
@@ -304,6 +434,8 @@ export class Lobby {
     const userIdPair = this.findNextMatchingPair();
     if (!userIdPair) return;
 
+    console.debug(`Lobby: Matched ${userIdPair[0]} and ${userIdPair[1]}`);
+
     const waitingA = this.waitingPlayerMap.get(userIdPair[0]);
     const waitingB = this.waitingPlayerMap.get(userIdPair[1]);
     if (!waitingA || !waitingB) return;
@@ -318,15 +450,29 @@ export class Lobby {
     this.matchedMap.set(userIdPair[1], gameRecordId);
 
     // 開始前ゲームを作成
-    this.waitingGameMap.set(gameRecordId, {
+    const timer = setTimeout(() => this.timeoutGameStart(gameRecordId), ACCEPT_TIMEOUT_MS);
+    const game: LobbyWaitingGame = {
       gameRecordId,
       players: [waitingA.player, waitingB.player],
       accepted: [false, false],
       waitUntil: getFutureTime(ACCEPT_TIMEOUT_MS),
-    });
+      timer,
+    };
+    this.waitingGameMap.set(gameRecordId, game);
+    console.debug(`Lobby: Created waiting game ${gameRecordId} for ${userIdPair[0]} and ${userIdPair[1]}`);
+
+    // 両者に通知
+    const response: GameWaitingResponse = {
+      type: 'GAME_WAITING',
+      waitUntil: game.waitUntil,
+    };
+    this.sendToUser(userIdPair[0], response);
+    this.sendToUser(userIdPair[1], response);
   }
 
   private findNextMatchingPair(): [UserId, UserId] | null {
+    if (this.waitingPlayerMap.size < 2) return null;
+
     // 今は単純に待ち行列先頭の 2 名をマッチングさせるだけ
     const time = getCurrentTime();
     const waitings = [...this.waitingPlayerMap.values()];
@@ -356,5 +502,20 @@ export class Lobby {
       }
     }
     return null;
+  }
+
+  private timeoutGameStart(gameRecordId: GameRecordId): void {
+    const game = this.waitingGameMap.get(gameRecordId);
+    if (game) {
+      this.waitingGameMap.delete(gameRecordId);
+      game.players.forEach((player) => {
+        this.matchedMap.delete(player.userId);
+        this.sendToUser(player.userId, {
+          type: 'DENIED',
+          reason: RequestDeniedReason.EXPIRED,
+          message: { ja: '試合開始がタイムアウトしました。' },
+        });
+      });
+    }
   }
 }

@@ -33,7 +33,7 @@
  */
 
 import { z } from 'zod';
-import { zId } from './common';
+import { Id, zId } from './common';
 
 /** 両方のリーダー */
 export const LEADERS = ['AL', 'BL'] as const;
@@ -288,7 +288,11 @@ export enum TargetType {
 /**
  * リーダーを対象とする場合の選択情報
  */
-export type TargetLeader = z.infer<typeof zTargetLeader>;
+export type TargetLeader = {
+  type: TargetType.LEADER;
+  /** 対象リーダーの位置 */
+  position: LeaderPosition;
+};
 export const zTargetLeader = z.object({
   type: z.literal(TargetType.LEADER),
   position: zLeaderPosition,
@@ -297,7 +301,11 @@ export const zTargetLeader = z.object({
 /**
  * フィールドユニットを対象とする場合の選択情報
  */
-export type TargetUnit = z.infer<typeof zTargetUnit>;
+export type TargetUnit = {
+  type: TargetType.UNIT;
+  /** 対象フィールドユニットのID */
+  unitId: Id;
+};
 export const zTargetUnit = z.object({
   type: z.literal(TargetType.UNIT),
   unitId: zId,
@@ -306,7 +314,11 @@ export const zTargetUnit = z.object({
 /**
  * フィールド建物を対象とする場合の選択情報
  */
-export type TargetBuilding = z.infer<typeof zTargetBuilding>;
+export type TargetBuilding = {
+  type: TargetType.BUILDING;
+  /** 対象フィールド建物のID */
+  buildingId: Id;
+};
 export const zTargetBuilding = z.object({
   type: z.literal(TargetType.BUILDING),
   buildingId: zId,
@@ -315,7 +327,11 @@ export const zTargetBuilding = z.object({
 /**
  * フィールド地形を対象とする場合の選択情報
  */
-export type TargetFloor = z.infer<typeof zTargetFloor>;
+export type TargetFloor = {
+  type: TargetType.FLOOR;
+  /** 対象フィールド地形のID */
+  floorId: Id;
+};
 export const zTargetFloor = z.object({
   type: z.literal(TargetType.FLOOR),
   floorId: zId,
@@ -324,7 +340,11 @@ export const zTargetFloor = z.object({
 /**
  * 1マスを対象とする場合の選択情報
  */
-export type TargetCell = z.infer<typeof zTargetCell>;
+export type TargetCell = {
+  type: TargetType.CELL;
+  /** 対象マスの位置 */
+  position: CellPosition;
+};
 export const zTargetCell = z.object({
   type: z.literal(TargetType.CELL),
   position: zCellPosition,
@@ -333,7 +353,11 @@ export const zTargetCell = z.object({
 /**
  * 横1行を対象とする場合の選択情報
  */
-export type TargetRow = z.infer<typeof zTargetRow>;
+export type TargetRow = {
+  type: TargetType.ROW;
+  /** 対象横行の位置 */
+  position: RowPosition;
+};
 export const zTargetRow = z.object({
   type: z.literal(TargetType.ROW),
   position: zRowPosition,
@@ -342,7 +366,11 @@ export const zTargetRow = z.object({
 /**
  * 縦1列を対象とする場合の選択情報
  */
-export type TargetColumn = z.infer<typeof zTargetColumn>;
+export type TargetColumn = {
+  type: TargetType.COLUMN;
+  /** 対象縦列の位置 */
+  position: ColumnPosition;
+};
 export const zTargetColumn = z.object({
   type: z.literal(TargetType.COLUMN),
   position: zColumnPosition,
@@ -351,7 +379,11 @@ export const zTargetColumn = z.object({
 /**
  * 片側の横1行を対象とする場合の選択情報
  */
-export type TargetSideRow = z.infer<typeof zTargetSideRow>;
+export type TargetSideRow = {
+  type: TargetType.SIDE_ROW;
+  /** 対象片側横行の位置 */
+  position: SideRowPosition;
+};
 export const zTargetSideRow = z.object({
   type: z.literal(TargetType.SIDE_ROW),
   position: zSideRowPosition,
@@ -360,7 +392,11 @@ export const zTargetSideRow = z.object({
 /**
  * 装備武器を対象とする場所の選択情報
  */
-export type TargetEquipWeapon = z.infer<typeof zTargetEquipWeapon>;
+export type TargetEquipWeapon = {
+  type: TargetType.EQUIP_WEAPON;
+  /** 対象装備武器のID */
+  weaponId: Id;
+};
 export const zTargetEquipWeapon = z.object({
   type: z.literal(TargetType.EQUIP_WEAPON),
   weaponId: zId,
@@ -369,7 +405,11 @@ export const zTargetEquipWeapon = z.object({
 /**
  * パワフルバッジを対象とする選択情報
  */
-export type TargetBadge = z.infer<typeof zTargetBadge>;
+export type TargetBadge = {
+  type: TargetType.BADGE;
+  /** 対象パワフルバッジのID */
+  badgeId: Id;
+};
 export const zTargetBadge = z.object({
   type: z.literal(TargetType.BADGE),
   badgeId: zId,
@@ -378,7 +418,17 @@ export const zTargetBadge = z.object({
 /**
  * 対象選択情報ユニオン
  */
-export type Target = z.infer<typeof zTarget>;
+export type Target =
+  | TargetLeader
+  | TargetUnit
+  | TargetBuilding
+  | TargetFloor
+  | TargetCell
+  | TargetRow
+  | TargetColumn
+  | TargetSideRow
+  | TargetEquipWeapon
+  | TargetBadge;
 export const zTarget = z.discriminatedUnion('type', [
   zTargetLeader,
   zTargetUnit,
@@ -430,7 +480,7 @@ export const EffectTargetType = {
 /**
  * 持続効果の対象ユニオン
  */
-export type EffectTarget = z.infer<typeof zEffectTarget>;
+export type EffectTarget = TargetLeader | TargetUnit | TargetFloor;
 export const zEffectTarget = z.discriminatedUnion('type', [zTargetLeader, zTargetUnit, zTargetFloor]);
 
 /**
@@ -455,7 +505,7 @@ export const EffectSourceType = {
 /**
  * 持続効果ソースユニオン
  */
-export type EffectSource = z.infer<typeof zEffectSource>;
+export type EffectSource = TargetLeader | TargetUnit | TargetBuilding | TargetFloor | TargetEquipWeapon | TargetBadge;
 export const zEffectSource = z.discriminatedUnion('type', [
   zTargetLeader,
   zTargetUnit,
@@ -476,7 +526,11 @@ export enum EffectEndTimingType {
 /**
  * 指定プレイヤーのターン終了時まで
  */
-export type EffectEndTimingAtTurnEnd = z.infer<typeof zEffectEndTimingAtTurnEnd>;
+export type EffectEndTimingAtTurnEnd = {
+  type: EffectEndTimingType.AT_TURN_END;
+  /** 対象プレイヤー位置 */
+  leader: LeaderPosition;
+};
 export const zEffectEndTimingAtTurnEnd = z.object({
   type: z.literal(EffectEndTimingType.AT_TURN_END),
   leader: zLeaderPosition,
@@ -485,13 +539,13 @@ export const zEffectEndTimingAtTurnEnd = z.object({
 /**
  * 持続効果の終了タイミング情報ユニオン
  */
-export type EffectEndTiming = z.infer<typeof zEffectEndTiming>;
+export type EffectEndTiming = EffectEndTimingAtTurnEnd;
 export const zEffectEndTiming = z.discriminatedUnion('type', [zEffectEndTimingAtTurnEnd]);
 
 /**
  * 攻撃・特技使用・スキル使用対象ユニオン
  */
-export type AttackTarget = z.infer<typeof zAttackTarget>;
+export type AttackTarget = TargetLeader | TargetUnit;
 export const zAttackTarget = z.discriminatedUnion('type', [zTargetLeader, zTargetUnit]);
 
 /**
@@ -513,59 +567,75 @@ export enum DamageSourceType {
 /**
  * リーダーの攻撃や装備武器の効果などによって発生した攻撃ソース
  */
-export type DamageSourceLeader = z.infer<typeof zDamageSourceLeader>;
+export type DamageSourceLeader = {
+  type: DamageSourceType.LEADER;
+  /** 攻撃や効果などを発生させたリーダー位置 */
+  position: LeaderPosition;
+};
 export const zDamageSourceLeader = z.object({
   type: z.literal(DamageSourceType.LEADER),
-  /** 攻撃や効果などを発生させたリーダー位置 */
   position: zLeaderPosition,
 });
 
 /**
  * フィールドユニットの攻撃や効果などによって発生したソース
  */
-export type DamageSourceUnit = z.infer<typeof zDamageSourceUnit>;
+export type DamageSourceUnit = {
+  type: DamageSourceType.UNIT;
+  /** 攻撃や効果などを発生させたユニット位置 */
+  position: CellPosition;
+};
 export const zDamageSourceUnit = z.object({
   type: z.literal(DamageSourceType.UNIT),
-  /** 攻撃や効果などを発生させたユニット位置 */
   position: zCellPosition,
 });
 
 /**
  * 特技カードの使用によって発生したソース
  */
-export type DamageSourceSpell = z.infer<typeof zDamageSourceSpell>;
+export type DamageSourceSpell = {
+  type: DamageSourceType.SPELL;
+  /** 特技カードを使用したリーダー位置 */
+  position: LeaderPosition;
+  /** 特技カード実体のID */
+  cardId: Id;
+};
 export const zDamageSourceSpell = z.object({
   type: z.literal(DamageSourceType.SPELL),
-  /** 特技カードを使用したリーダー位置 */
   position: zLeaderPosition,
-  /** 特技カード実体のID */
   cardId: zId,
 });
 
 /**
  * テンションスキルの使用によって発生したソース
  */
-export type DamageSourceTentionSkill = z.infer<typeof zDamageSourceTentionSkill>;
+export type DamageSourceTentionSkill = {
+  type: DamageSourceType.TENTION_SKILL;
+  /** テンションスキルを使用したリーダー位置 */
+  position: LeaderPosition;
+};
 export const zDamageSourceTentionSkill = z.object({
   type: z.literal(DamageSourceType.TENTION_SKILL),
-  /** テンションスキルを使用したリーダー位置 */
   position: zLeaderPosition,
 });
 
 /**
  * ヒーロースキルの使用によって発生したソース
  */
-export type DamageSourceHeroSkill = z.infer<typeof zDamageSourceHeroSkill>;
+export type DamageSourceHeroSkill = {
+  type: DamageSourceType.HERO_SKILL;
+  /** ヒーロースキルを使用したリーダー位置 */
+  position: LeaderPosition;
+};
 export const zDamageSourceHeroSkill = z.object({
   type: z.literal(DamageSourceType.HERO_SKILL),
-  /** ヒーロースキルを使用したリーダー位置 */
   position: zLeaderPosition,
 });
 
 /**
  * 攻撃・回復ソースユニオン
  */
-export type DamageSource = z.infer<typeof zDamageSource>;
+export type DamageSource = DamageSourceLeader | DamageSourceUnit | DamageSourceSpell | DamageSourceTentionSkill | DamageSourceHeroSkill;
 export const zDamageSource = z.discriminatedUnion('type', [
   zDamageSourceLeader,
   zDamageSourceUnit,

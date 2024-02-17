@@ -35,8 +35,7 @@ export class MelaGhost extends BaseUnitCardDefinition {
     });
   }
 
-  use(ctx: GameContext, card: UnitCardState, target?: Target, additionalTarget?: Target): void {
-    super.use(ctx, card, target, additionalTarget);
+  onUse(ctx: GameContext, card: UnitCardState, target?: Target, additionalTarget?: Target): void {
     if (target?.type !== TargetType.CELL) return;
 
     if (additionalTarget && (additionalTarget.type === TargetType.UNIT || additionalTarget.type === TargetType.LEADER)) {

@@ -420,6 +420,11 @@ export class GameServerContext implements GameContext {
     return this.createOrCachedPlayerContext(position);
   }
 
+  getOpponent(position: LeaderPosition): PlayerContext {
+    const enemyPosition = BY_LEADER[position].enemyLeader;
+    return this.createOrCachedPlayerContext(enemyPosition);
+  }
+
   getCardContext<T extends CardState>(card: T): CardContext<T> {
     const context = this._cachedCardContext.get(card);
     if (context) {

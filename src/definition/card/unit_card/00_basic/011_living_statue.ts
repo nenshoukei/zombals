@@ -3,24 +3,24 @@ import { effectRegistry } from '@/registry';
 import { CardJob, CardPack, CardRarity, CardType, FieldUnitState, GameContext, UnitKind } from '@/types';
 import { BaseUnitCardDefinition } from '@/types/definition/unit_card';
 
-export class ShieldKid extends BaseUnitCardDefinition {
-  static readonly id = this.generateId(CardPack.BASIC, CardType.UNIT, 7);
+export class LivingStatue extends BaseUnitCardDefinition {
+  static readonly id = this.generateId(CardPack.BASIC, CardType.UNIT, 11);
 
   constructor() {
     super({
-      id: ShieldKid.id,
+      id: LivingStatue.id,
       name: {
-        ja: 'シールドこぞう',
+        ja: 'リビングスタチュー',
       },
       description: {
         ja: '*におうだち*',
       },
-      cost: 2,
+      cost: 4,
       job: CardJob.COMMON,
       rarity: CardRarity.NORMAL,
       pack: CardPack.BASIC,
-      power: 2,
-      maxHP: 2,
+      power: 3,
+      maxHP: 5,
       kind: UnitKind.NONE,
     });
   }

@@ -151,6 +151,14 @@ export interface GameContext {
   getPlayer(position: LeaderPosition): PlayerContext;
 
   /**
+   * 指定リーダー位置と逆側にいるプレイヤーのコンテキストを取得する
+   *
+   * @param position 指定リーダー位置
+   * @returns 指定リーダー位置の敵側のプレイヤーのコンテキスト
+   */
+  getOpponent(position: LeaderPosition): PlayerContext;
+
+  /**
    * カード実体のコンテキストを取得する
    *
    * @param card カード実体

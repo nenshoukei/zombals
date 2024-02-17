@@ -1,6 +1,6 @@
 import { CardType } from '../common';
 import { GameContext } from '../context';
-import { AttackTarget, LeaderPosition, Target, TargetType } from '../field';
+import { AttackTarget, LeaderPosition, Target, TargetCell, TargetType } from '../field';
 import { FieldUnitState, UnitCardState } from '../game_state';
 import { UnitCardDefinition } from './base';
 import { BaseCardDefinition, BaseCardDefinitionInit } from './card';
@@ -79,12 +79,18 @@ export abstract class BaseUnitCardDefinition
     return true;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   use(ctx: GameContext, card: UnitCardState, target?: Target, additionalTarget?: Target): void {
-    if (target?.type === TargetType.CELL) {
-      // 指定マスにユニットカードをプレイ
-      ctx.field.putUnitCardAt(card, target.position);
-    }
+    if (target?.type !== TargetType.CELL) return;
+
+    // 指定マスにユニットカードをプレイ
+    ctx.field.putUnitCardAt(card, target.position);
+
+    this.onUse(ctx, card, target, additionalTarget);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onUse(ctx: GameContext, card: UnitCardState, target: TargetCell, additionalTarget?: Target): void {
+    // デフォルトは何もしない
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

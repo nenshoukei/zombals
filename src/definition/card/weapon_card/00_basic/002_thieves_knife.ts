@@ -19,6 +19,7 @@ export class ThievesKnife extends BaseWeaponCardDefinition {
       pack: CardPack.BASIC,
       power: 1,
       durability: 2,
+      isToken: true,
     });
   }
 }

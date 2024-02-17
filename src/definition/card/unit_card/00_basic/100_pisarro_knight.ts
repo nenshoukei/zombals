@@ -20,6 +20,7 @@ export class PisarroKnight extends BaseUnitCardDefinition {
       power: 3,
       maxHP: 2,
       kind: UnitKind.NONE,
+      isToken: true,
     });
   }
 }

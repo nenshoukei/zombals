@@ -84,6 +84,9 @@ export class GameServerContext implements GameContext {
   get field(): FieldContext {
     return this._fieldContext;
   }
+  get turn(): number {
+    return this._state.turn;
+  }
   get onAction() {
     return this._onAction;
   }

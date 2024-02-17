@@ -51,6 +51,11 @@ export interface GameContext {
   get field(): FieldContext;
 
   /**
+   * 現在のターン番号
+   */
+  get turn(): number;
+
+  /**
    * アクション発生イベント
    */
   get onAction(): TypedEvent<GameActionEvent>;

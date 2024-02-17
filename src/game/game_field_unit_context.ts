@@ -1,5 +1,6 @@
 import {
   DoubleAttackEffect,
+  HasteEffect,
   PowerChangeEffect,
   PowerChangeEffectStorage,
   StatsChangeEffect,
@@ -225,6 +226,14 @@ export class GameFieldUnitContext implements FieldUnitContext {
   }
 
   canAttack(): boolean {
+    // このターンに召喚されていたら攻撃不可 (速攻は除く)
+    const haste = this._game.findEffectByDef(HasteEffect, this.asTarget);
+    if (!haste) {
+      if (this._game.turn === this.state.summonedTurn) {
+        return false;
+      }
+    }
+
     // 攻撃回数が問題ないかチェック
     if (this.state.turnAttackCount === 1) {
       // 2回行動がついているかどうかチェック

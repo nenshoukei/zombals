@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useCurrentSession } from '$/hooks/useCurrentSession';
-import { useDeckList } from '$/hooks/useDeckList';
+import { useCurrentSession } from '@/hooks/useCurrentSession';
+import { useDeckList } from '@/hooks/useDeckList';
 import { cardRegistry } from '@/registry';
 import { CardDefinitionBase, ZombalsRequest, zZombalsResponse } from '@/types';
 import { cardJobNameMap, cardPackNameMap, cardRarityNameMap, Job } from '@/types/common';

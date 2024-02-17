@@ -22,11 +22,10 @@
     "noEmit": false,
     "baseUrl": ".",
     "paths": {
-      "$/*": ["client/*"],
       "@/*": ["src/*"]
     },
     "outDir": "dist"
   },
-  "include": ["src/**/*.ts", "client/**/*.ts", "client/**/*.tsx", "*.ts", "*.js"],
+  "include": ["src/**/*", "client/**/*", "*.ts", "*.js"],
   "exclude": ["node_modules", "dist"]
 }

@@ -22,7 +22,7 @@ import {
 } from '@/types';
 
 /** マッチングのタイムアウト時間 */
-const MATCHING_TIMEOUT_MS = 30 * 1000; // 3 * 60 * 1000;
+const MATCHING_TIMEOUT_MS = 3 * 60 * 1000;
 /** ゲーム開始のタイムアウト時間 */
 const ACCEPT_TIMEOUT_MS = 10 * 1000;
 

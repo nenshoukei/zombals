@@ -90,7 +90,7 @@ export class GameServerContext implements GameContext {
 
   protected createInitialGameState(): GameState {
     return {
-      turnNumber: 1,
+      turn: 1,
       turnWillEndAt: null,
       mulliganSwapped: {},
       field: {
@@ -497,14 +497,14 @@ export class GameServerContext implements GameContext {
     this.updateState({
       ...this.state,
       activeLeader: this.enemy.position,
-      turnNumber: this.state.turnNumber + 1,
+      turn: this.state.turn + 1,
       turnWillEndAt,
     });
 
     this.emitAction({
       type: GameActionType.TURN_START,
       actor: this.state.activeLeader,
-      turnNumber: this.state.turnNumber,
+      turn: this.state.turn,
       turnWillEndAt,
       timestamp: getCurrentTime(),
     });

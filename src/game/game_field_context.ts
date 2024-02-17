@@ -217,6 +217,7 @@ export class GameFieldContext implements FieldContext {
       basePower: unit.power,
       baseMaxHP: unit.maxHP,
       currentHP: unit.maxHP,
+      summonedTurn: this._game.state.turn,
       turnAttackCount: 0,
     };
 

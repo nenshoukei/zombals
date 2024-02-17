@@ -2,37 +2,33 @@ import { z } from 'zod';
 import { MAX_HAND } from '@/config/common';
 
 /** 数値ID */
-export const zId = z
-  .number()
-  .int()
-  .min(1)
-  .refine((v): v is Id => true);
-export type Id = number & { __type: 'Id' };
+export const zId = z.number().int().min(1);
+export type Id = number;
 
 /** ユーザーID */
 export const zUserId = z
   .string()
   .uuid()
   .refine((v): v is UserId => true);
-export type UserId = string & { __type: 'UserId' };
+export type UserId = string;
 
 /** ユーザー名 */
 export const zUserName = z
   .string()
   .min(1)
   .refine((v): v is UserName => true);
-export type UserName = string & { __type: 'UserName' };
+export type UserName = string;
 
 /** デッキID */
 export const zDeckId = z
   .string()
   .uuid()
   .refine((v): v is DeckId => true);
-export type DeckId = string & { __type: 'DeckId' };
+export type DeckId = string;
 
 /** タイムスタンプ (エポックミリ秒) */
 export const zTimestamp = z.number().int().min(1);
-export type Timestamp = number & { __type: 'Timestamp' };
+export type Timestamp = number;
 export const getCurrentTime = () => Date.now() as Timestamp;
 export const getFutureTime = (deltaMS: number) => (Date.now() + deltaMS) as Timestamp;
 

@@ -154,7 +154,7 @@ export type GameTurnStartAction = z.infer<typeof zGameTurnStartAction>;
 export const zGameTurnStartAction = zGameActionBase.extend({
   type: z.literal(GameActionType.TURN_START),
   /** ターン番号 (1から開始) */
-  turnNumber: z.number().int().min(1),
+  turn: z.number().int().min(1),
   /**
    * ターンがタイムアウトする日時 (サーバー側エポックミリ秒)
    *

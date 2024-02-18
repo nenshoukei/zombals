@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" version="1.1" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+ <linearGradient id="linearGradient1" x1="94" x2="418" y1="256" y2="256" gradientTransform="matrix(.99212 .12529 -.12529 .99212 34.092 -30.058)" gradientUnits="userSpaceOnUse">
+  <stop stop-color="#15c6c6" offset="0"/>
+  <stop stop-color="#3b68cd" offset="1"/>
+ </linearGradient>
+ <filter id="filter1" x="0" y="0" width="512" height="512" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+  <feGaussianBlur stdDeviation="9"/>
+  <feOffset dx="3.01582" dy="5.186987" result="offsetblur"/>
+  <feFlood flood-color="#000000" flood-opacity=".4675"/>
+  <feComposite in2="offsetblur" operator="in"/>
+  <feMerge>
+   <feMergeNode/>
+   <feMergeNode in="SourceGraphic"/>
+  </feMerge>
+ </filter>
+ <path d="m69.466 440.08c-0.89957 7.1231 4.1456 13.627 11.269 14.526l295.65 37.337c7.1231 0.8996 13.627-4.1456 14.526-11.269l51.621-408.75c0.89957-7.1231-4.1456-13.627-11.269-14.526l-295.65-37.337c-7.1231-0.8996-13.627 4.1456-14.526 11.269z" fill="url(#linearGradient1)" fill-rule="evenodd" filter="url(#filter1)"/>
+ <path id="Z" transform="matrix(.99212 .12529 -.12529 .99212 37.601 -29.837)" d="m157.75 358.84 122.34-200q-36.25 0-43.281 0.78125-6.875 0.625-12.656 1.875-20.312 4.0625-31.875 19.375-6.875 9.2188-15.625 32.812h-8.9062l6.7188-65.938h167.81v5.1562l-121.56 200q65.156 0 87.812-10 22.812-10 34.844-55.938h8.4375l-8.4375 77.031h-185.62z" fill="#fff" aria-label="Z"/>
+</svg>

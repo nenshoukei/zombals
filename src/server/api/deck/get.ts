@@ -14,5 +14,6 @@ export const deckGet = apiInputHandler(zDeckGetParams, async ({ deckId }, req, r
     return;
   }
 
+  res.setHeader('Cache-Control', 'max-age=1');
   res.status(200).json({ deck });
 });

@@ -6,7 +6,7 @@ import { CardDefinitionBase, GameCommandType, ZombalsRequest, zZombalsResponse }
 import { cardJobNameMap, cardPackNameMap, cardRarityNameMap, Job } from '@/types/common';
 
 export default function App() {
-  const [session, reloadSession] = useCurrentSession();
+  const { session, reload: reloadSession } = useCurrentSession();
   const [decks, reloadDecks] = useDeckList();
   const [cards, setCards] = useState<CardDefinitionBase[] | null>(null);
 

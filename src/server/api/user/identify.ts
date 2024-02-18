@@ -2,8 +2,7 @@ import { z } from 'zod';
 import { apiInputHandler } from '@/server/api/handler';
 import { identifyUser } from '@/server/db';
 import { writeSessionToRequest } from '@/server/session';
-import { LoginId, zLoginId, zRawPassword } from '@/server/types';
-import { UserId, UserName } from '@/types';
+import { LoginId, UserId, UserName, zLoginId, zRawPassword } from '@/types/common';
 
 const zIdentifyParams = z.object({
   loginId: zLoginId,

@@ -2,8 +2,7 @@ import { z } from 'zod';
 import { apiInputHandler } from '@/server/api/handler';
 import { updateUser } from '@/server/db';
 import { writeSessionToRequest } from '@/server/session';
-import { LoginId } from '@/server/types';
-import { UserId, UserName, zUserName } from '@/types';
+import { LoginId, UserId, UserName, zUserName } from '@/types/common';
 
 const zUpdateParams = z.object({
   name: zUserName,

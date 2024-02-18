@@ -7,6 +7,7 @@ import { deckUpdate } from '@/server/api/deck/update';
 import { sessionCurrent } from '@/server/api/session/current';
 import { sessionLogin } from '@/server/api/session/login';
 import { sessionLogout } from '@/server/api/session/logout';
+import { userIdCheck } from '@/server/api/user/idcheck';
 import { userIdentify } from '@/server/api/user/identify';
 import { userRegister } from '@/server/api/user/register';
 import { userUpdate } from '@/server/api/user/update';
@@ -21,6 +22,7 @@ routes.post('/api/session/logout', sessionLogout);
 routes.post('/api/user/register', userRegister);
 routes.post('/api/user/update', authMiddleware, userUpdate);
 routes.post('/api/user/identify', authMiddleware, userIdentify);
+routes.post('/api/user/idcheck', authMiddleware, userIdCheck);
 
 routes.get('/api/deck/get', authMiddleware, deckGet);
 routes.get('/api/deck/all', authMiddleware, deckAll);

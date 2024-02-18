@@ -1,10 +1,11 @@
 import { WebSocket, WebSocketServer } from 'ws';
 import { Lobby, UserSender } from './lobby';
-import { readSessionFromRequest, Session } from './session';
+import { readSessionFromRequest } from './session';
 import { logger } from '@/logger';
 import {
   GameForbiddenOperationError,
   RequestDeniedReason,
+  Session,
   SocketDisconnectReason,
   SocketDisconnectResponse,
   UserId,

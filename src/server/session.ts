@@ -1,11 +1,9 @@
 import cookie from 'cookie';
 import { Response } from 'express';
 import { createDecoder, createSigner } from 'fast-jwt';
-import { z } from 'zod';
 import { SERVER_SECURE_KEY } from '../../keys.json';
 import type { IncomingMessage } from 'node:http';
-import { zLoginId } from '@/server/types';
-import { zUserId, zUserName } from '@/types';
+import { Session, zSession } from '@/types/session';
 
 export const COOKIE_KEY = 'sid';
 export const COOKIE_MAX_AGE = 60 * 24 * 365 * 3;
@@ -14,13 +12,6 @@ const signer = createSigner({
   key: SERVER_SECURE_KEY,
 });
 const decoder = createDecoder();
-
-export const zSession = z.object({
-  userId: zUserId,
-  name: zUserName,
-  loginId: zLoginId.optional(),
-});
-export type Session = z.infer<typeof zSession>;
 
 /**
  * セッション情報の Set-Header をレスポンスに書き加える

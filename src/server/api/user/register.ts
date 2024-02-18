@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { apiInputHandler } from '@/server/api/handler';
 import { createUser } from '@/server/db';
 import { readSessionFromRequest, writeSessionToRequest } from '@/server/session';
-import { UserId, UserName, zUserName } from '@/types';
+import { UserId, UserName, zUserName } from '@/types/common';
 
 const zRegisterParams = z.object({
   name: zUserName,

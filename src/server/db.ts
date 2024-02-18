@@ -2,7 +2,6 @@ import { Deck, PrismaClient, User } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { uuidv7 } from 'uuidv7';
 import { DECK_CARD_NUM } from '@/config/common';
-import { LoginId, RawPassword } from '@/server/types';
 import {
   DeckId,
   GamePlayer,
@@ -11,7 +10,9 @@ import {
   Id,
   Job,
   LeaderPosition,
+  LoginId,
   PlayerRank,
+  RawPassword,
   UserId,
   zGamePlayer,
   zGameRecord,
@@ -65,6 +66,19 @@ export async function updateUser(userId: UserId, params: UpdateUserParams): Prom
     },
   });
   return user;
+}
+
+/**
+ * ログインIDが利用可能かどうか確認する。
+ */
+export async function isLoginIdAvailable(loginId: LoginId): Promise<boolean> {
+  const count = await prisma.user.count({
+    where: {
+      loginId,
+    },
+    take: 1,
+  });
+  return count === 0;
 }
 
 /**

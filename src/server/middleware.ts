@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { readSessionFromRequest, Session } from './session';
+import { readSessionFromRequest } from './session';
 import { Logger, logger } from '@/logger';
+import { Session } from '@/types/session';
 
 declare module 'express' {
   export interface Request {

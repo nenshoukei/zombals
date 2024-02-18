@@ -20,18 +20,15 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(ViteExpress.static());
 
-app.use(pinoHttp({ logger }));
-
-// app.use(
-//   expressWinston.logger({
-//     transports: [new winston.transports.Console()],
-//     format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
-//     ignoreRoute: (req) => {
-//       // うるさいログを除外
-//       return /^\/(@|node_modules|src|client|favicon\.ico)/.test(req.path) || req.headers.accept === 'text/x-vite-ping';
-//     },
-//   }),
-// );
+app.use(
+  pinoHttp({
+    logger,
+    serializers: {
+      req: (req) => `${req.method} ${req.url}`,
+      res: (res) => `${res.statusCode} ${res.headers['content-type'] ?? 'No content'}`,
+    },
+  }),
+);
 
 app.use(sessionMiddleware);
 app.use(routes);

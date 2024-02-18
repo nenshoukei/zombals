@@ -1,11 +1,12 @@
 import { uuidv7 } from 'uuidv7';
 import { getGamePlayer, saveGameRecord } from './db';
 import { CLIENT_VERSION } from '@/config/client_version';
+import { ACCEPT_TIMEOUT_MS, MATCHING_TIMEOUT_MS } from '@/config/common';
 import { GameServerMain } from '@/game/game_server_main';
+import { logger, Logger } from '@/logger';
 import {
   GameActionResponse,
   GameCommand,
-  GameForbiddenOperationError,
   GamePlayer,
   GameRecordId,
   GameStartResponse,
@@ -20,11 +21,6 @@ import {
   UserId,
   ZombalsResponse,
 } from '@/types';
-
-/** マッチングのタイムアウト時間 */
-const MATCHING_TIMEOUT_MS = 3 * 60 * 1000;
-/** ゲーム開始のタイムアウト時間 */
-const ACCEPT_TIMEOUT_MS = 10 * 1000;
 
 export interface LobbyWaitingPlayer {
   /** 待ち受けプレイヤー */
@@ -63,12 +59,15 @@ export class Lobby {
   waitingGameMap: Map<GameRecordId, LobbyWaitingGame>;
   /** 進行中のゲーム */
   ongoingGameMap: Map<GameRecordId, GameServerMain>;
+  /** ロガー */
+  logger: Logger;
 
   constructor(private userSender: UserSender) {
     this.waitingPlayerMap = new Map();
     this.matchedMap = new Map();
     this.waitingGameMap = new Map();
     this.ongoingGameMap = new Map();
+    this.logger = logger.child({ tag: 'lobby' });
   }
 
   private sendToUser(userId: UserId, response: ZombalsResponse): void {
@@ -153,6 +152,8 @@ export class Lobby {
       }
       this.waitingPlayerMap.set(userId, waiting);
       this.matchedMap.delete(userId);
+
+      this.logger.debug({ userId, deckId: req.deckId, passCode: req.passCode }, 'User start matching');
     }
 
     setImmediate(() => this.makeNextMatch());
@@ -168,6 +169,7 @@ export class Lobby {
     if (waiting) {
       clearTimeout(waiting.timer);
       this.waitingPlayerMap.delete(userId);
+      this.logger.debug({ userId }, 'User timeout matching');
 
       this.sendToUser(waiting.player.userId, {
         type: 'DENIED',
@@ -188,6 +190,7 @@ export class Lobby {
       // マッチング待ちを解除
       clearTimeout(waiting.timer);
       this.waitingPlayerMap.delete(userId);
+      this.logger.debug({ userId }, 'User leave from matching');
     }
 
     const gameRecordId = this.matchedMap.get(userId);
@@ -199,6 +202,7 @@ export class Lobby {
       if (waitingGame) {
         clearTimeout(waitingGame.timer);
         this.waitingGameMap.delete(gameRecordId);
+        this.logger.debug({ userId, gameRecordId }, 'User leave from waiting game');
       }
 
       // 進行中のゲームがあったら退室 = 投了扱いとする
@@ -206,6 +210,7 @@ export class Lobby {
       if (ongoingGame) {
         // プレイヤーの退室をゲーム内にも反映
         ongoingGame.userLeave(userId);
+        this.logger.debug({ userId, gameRecordId }, 'User leave from ongoing game');
       }
     }
   }
@@ -248,12 +253,14 @@ export class Lobby {
     const playerIndex = waitingGame.players[0].userId === userId ? 0 : 1;
     if (!waitingGame.accepted[playerIndex]) {
       waitingGame.accepted[playerIndex] = true;
+      this.logger.debug({ userId, gameRecordId }, `User accepted game (index:${playerIndex})`);
     }
 
     // 2人とも承諾したのでゲームを開始
     if (waitingGame.accepted[0] && waitingGame.accepted[1]) {
       clearTimeout(waitingGame.timer);
       this.waitingGameMap.delete(gameRecordId);
+      this.logger.debug({ gameRecordId }, 'Game start');
 
       // ゲームを作成
       const game = this.createNewGame(waitingGame);
@@ -319,25 +326,15 @@ export class Lobby {
       });
     }
 
-    try {
-      game.receiveGameCommand(userId, command);
-    } catch (e) {
-      console.error('Game Error:', e);
-      const isForbidden = e instanceof GameForbiddenOperationError;
-      return this.sendToUser(userId, {
-        type: 'DENIED',
-        reason: isForbidden ? RequestDeniedReason.FORBIDDEN : RequestDeniedReason.ERROR,
-        commandId: command.id,
-        message: { ja: isForbidden ? '不正な操作です。' : 'サーバーエラーが発生しました。' },
-      });
-    }
+    // コマンドを処理
+    game.receiveGameCommand(userId, command);
 
     if (game.isFinished) {
       // ゲームが終了していたら終了処理
       this.gameEnd(game);
     } else {
-      // ゲームが終了していなければコマンド受付状態とする
-      this.sendToUser(userId, { type: 'READY' });
+      // ゲームが終了していなければアクティブプレイヤーのコマンド受付状態とする
+      this.sendToUser(game.getActivePlayerId(), { type: 'READY' });
     }
   }
 
@@ -359,12 +356,13 @@ export class Lobby {
   private gameEnd(game: GameServerMain): void {
     // ゲーム内容を保存
     saveGameRecord(game.record).catch((e) => {
-      console.error('CRITICAL Lobby Failed to save game record:', e);
+      this.logger.error({ error: e }, 'Failed to save game record');
     });
 
     this.ongoingGameMap.delete(game.gameRecordId);
     this.matchedMap.delete(game.record.players.AL.userId);
     this.matchedMap.delete(game.record.players.BL.userId);
+    this.logger.debug({ gameRecordId: game.gameRecordId }, 'Game end');
   }
 
   async playerDemandGameAction(userId: UserId, fromIndex: number, toIndex?: number): Promise<void> {
@@ -434,8 +432,6 @@ export class Lobby {
     const userIdPair = this.findNextMatchingPair();
     if (!userIdPair) return;
 
-    console.debug(`Lobby: Matched ${userIdPair[0]} and ${userIdPair[1]}`);
-
     const waitingA = this.waitingPlayerMap.get(userIdPair[0]);
     const waitingB = this.waitingPlayerMap.get(userIdPair[1]);
     if (!waitingA || !waitingB) return;
@@ -459,7 +455,7 @@ export class Lobby {
       timer,
     };
     this.waitingGameMap.set(gameRecordId, game);
-    console.debug(`Lobby: Created waiting game ${gameRecordId} for ${userIdPair[0]} and ${userIdPair[1]}`);
+    this.logger.debug({ gameRecordId, userIds: userIdPair }, `Created waiting game`);
 
     // 両者に通知
     const response: GameWaitingResponse = {

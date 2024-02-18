@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
 import { z } from 'zod';
+import { apiInputHandler } from '@/server/api/handler';
 import { login } from '@/server/db';
 import { writeSessionToRequest } from '@/server/session';
 import { LoginId, zLoginId, zRawPassword } from '@/server/types';
@@ -10,31 +10,20 @@ const zLoginParams = z.object({
   password: zRawPassword,
 });
 
-export function sessionLogin(req: Request, res: Response) {
-  const parsed = zLoginParams.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error });
+export const sessionLogin = apiInputHandler(zLoginParams, async ({ loginId, password }, req, res) => {
+  const user = await login(loginId, password);
+  if (!user) {
+    req.logger?.debug({ loginId }, 'Invalid login ID or password');
+    res.status(400).json({ error: 'Invalid login ID or password' });
     return;
   }
 
-  const { loginId, password } = parsed.data;
-  login(loginId, password)
-    .then((user) => {
-      if (!user) {
-        res.status(400).json({ error: 'Invalid login ID or password' });
-        return;
-      }
-
-      const session = {
-        userId: user.id as UserId,
-        name: user.name as UserName,
-        loginId: user.loginId as LoginId,
-      };
-      writeSessionToRequest(res, session);
-      res.status(200).json({ session });
-    })
-    .catch((e) => {
-      console.error(e);
-      res.status(500).json({ error: 'Failed to login' });
-    });
-}
+  const session = {
+    userId: user.id as UserId,
+    name: user.name as UserName,
+    loginId: user.loginId as LoginId,
+  };
+  writeSessionToRequest(res, session);
+  req.logger?.debug({ session }, 'Logged in');
+  res.status(200).json({ session });
+});

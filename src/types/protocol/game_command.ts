@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zHandIndex, zId, zUserId } from '../common';
+import { zHandIndex, zId } from '../common';
 import { zLeaderCellPosition, zTarget } from '../field';
 
 /**
@@ -16,11 +16,6 @@ const zGameCommandBase = z.object({
    * コマンドに対応するレスポンスの区別用として用いる。
    */
   id: zId,
-
-  /**
-   * コマンドを送信したプレイヤーのID
-   */
-  userId: zUserId,
 });
 
 /**

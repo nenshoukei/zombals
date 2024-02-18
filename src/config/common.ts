@@ -15,7 +15,11 @@ export const FIRST_HAND_NUM: Record<'first' | 'second', number> = {
   second: 4,
 };
 
+/** マッチングのタイムアウト時間 */
+export const MATCHING_TIMEOUT_MS = 1000 * 10;
+/** ゲーム開始のタイムアウト時間 */
+export const ACCEPT_TIMEOUT_MS = 1000 * 10;
 /** マリガンのタイムアウト時間 (ミリ秒) */
-export const MULLIGAN_TIMEOUT_MS = 1000 * 60;
+export const MULLIGAN_TIMEOUT_MS = 1000 * 10;
 /** 1ターンのタイムアウト時間 (ミリ秒) */
-export const TURN_TIMEOUT_MS = 1000 * 60 * 3;
+export const TURN_TIMEOUT_MS = 1000 * 10;

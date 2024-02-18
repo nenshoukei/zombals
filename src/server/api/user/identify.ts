@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
 import { z } from 'zod';
+import { apiInputHandler } from '@/server/api/handler';
 import { identifyUser } from '@/server/db';
 import { writeSessionToRequest } from '@/server/session';
 import { LoginId, zLoginId, zRawPassword } from '@/server/types';
@@ -10,31 +10,19 @@ const zIdentifyParams = z.object({
   password: zRawPassword,
 });
 
-export function userIdentify(req: Request, res: Response) {
-  const parsed = zIdentifyParams.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error });
+export const userIdentify = apiInputHandler(zIdentifyParams, async ({ loginId, password }, req, res) => {
+  const user = await identifyUser(req.session!.userId, loginId, password);
+  if (user === 'LOGIN_ID_DUPLICATE') {
+    res.status(400).json({ error: 'Login ID already exists' });
     return;
   }
 
-  (async () => {
-    const { loginId, password } = parsed.data;
-
-    const user = await identifyUser(req.session!.userId, loginId, password);
-    if (user === 'LOGIN_ID_DUPLICATE') {
-      res.status(400).json({ error: 'Login ID already exists' });
-      return;
-    }
-
-    const session = {
-      userId: user.id as UserId,
-      name: user.name as UserName,
-      loginId: user.loginId as LoginId,
-    };
-    writeSessionToRequest(res, session);
-    res.status(200).json({ session });
-  })().catch((e) => {
-    console.error(e);
-    res.status(500).json({ error: 'Failed to update user' });
-  });
-}
+  const session = {
+    userId: user.id as UserId,
+    name: user.name as UserName,
+    loginId: user.loginId as LoginId,
+  };
+  writeSessionToRequest(res, session);
+  req.logger?.debug({ session }, 'Identified user');
+  res.status(200).json({ session });
+});

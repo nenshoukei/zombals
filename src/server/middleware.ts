@@ -1,18 +1,31 @@
 import { NextFunction, Request, Response } from 'express';
 import { readSessionFromRequest, Session } from './session';
+import { Logger, logger } from '@/logger';
 
 declare module 'express' {
   export interface Request {
     session?: Session;
+    logger?: Logger;
   }
 }
 
+export function sessionMiddleware(req: Request, res: Response, next: NextFunction): void {
+  req.session = readSessionFromRequest(req) ?? undefined;
+  next();
+}
+
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const session = readSessionFromRequest(req);
-  if (session) {
-    req.session = session;
+  if (req.session) {
     next();
   } else {
     res.status(401).send('Unauthorized');
   }
+}
+
+export function loggerMiddleware(req: Request, res: Response, next: NextFunction): void {
+  req.logger = logger.child({
+    tag: 'api',
+    userId: req.session?.userId,
+  });
+  next();
 }

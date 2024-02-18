@@ -57,6 +57,10 @@ export class GameServerMain {
     return this._ctx.record.players.AL.userId === userId ? 'AL' : 'BL';
   }
 
+  getActivePlayerId(): UserId {
+    return this._ctx.record.players[this._ctx.ally.position].userId;
+  }
+
   isActivePlayer(userId: UserId): boolean {
     return this._ctx.record.players[this._ctx.ally.position].userId === userId;
   }

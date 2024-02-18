@@ -1,7 +1,9 @@
 import { WebSocket, WebSocketServer } from 'ws';
 import { Lobby, UserSender } from './lobby';
 import { readSessionFromRequest, Session } from './session';
+import { logger } from '@/logger';
 import {
+  GameForbiddenOperationError,
   RequestDeniedReason,
   SocketDisconnectReason,
   SocketDisconnectResponse,
@@ -11,25 +13,30 @@ import {
   zZombalsRequest,
 } from '@/types';
 
+const wssLogger = logger.child({ tag: 'wss' });
+
 const userToSocketMap = new Map<UserId, WebSocket>();
 const userSender: UserSender = {
   sendToUser(userId, response) {
+    wssLogger.debug({ userId, response }, '--> Send to user');
     userToSocketMap.get(userId)?.send?.(JSON.stringify(response));
   },
 };
 
 export const lobby = new Lobby(userSender);
 
-export const wss = new WebSocketServer({ noServer: true });
+export const wss = new WebSocketServer({ noServer: true, path: '/ws' });
 
 wss.on('connection', (ws, req) => {
-  ws.on('error', (e) => console.error('WebSocketServer Error:', e));
+  ws.on('error', (e) => {
+    wssLogger.error({ error: e }, 'WebSocket error');
+  });
 
   let session: Session | null | undefined;
   try {
     session = readSessionFromRequest(req);
   } catch (e) {
-    console.warn('WebSocketServer Bad session cookie received:', e);
+    wssLogger.warn({ error: e }, 'Bad session cookie received');
   }
   if (!session) {
     ws.close(403, SocketDisconnectReason.NOT_AUTHORIZED);
@@ -37,20 +44,30 @@ wss.on('connection', (ws, req) => {
   }
 
   const { userId, name } = session;
-  console.debug(`WebSocketServer Connected: ${userId} (${name})`);
+  const userLogger = wssLogger.child({ userId });
+  userLogger.debug({ userName: name }, `<-- Connected to WebSocket`);
 
-  const send = (res: ZombalsResponse) => ws.send(JSON.stringify(res));
-  const close = (res: SocketDisconnectResponse) => ws.close(1000, JSON.stringify(res));
+  const send = (response: ZombalsResponse) => {
+    userLogger.debug({ response }, `--> Send to user`);
+    ws.send(JSON.stringify(response));
+  };
+  const close = (res: SocketDisconnectResponse) => {
+    userLogger.debug({ reason: res.reason }, `-x- User disconnected`);
+    ws.close(1000, JSON.stringify(res));
+  };
 
   // 配信用に WebSocket を記憶しておく
   if (userToSocketMap.has(userId)) {
     // 二重窓は不可 (新しい方を優先する)
-    const oldConn = userToSocketMap.get(userId);
+    const oldConn = userToSocketMap.get(userId)!;
     const response: SocketDisconnectResponse = {
       reason: SocketDisconnectReason.EXCLUSIVE,
       message: { ja: '他の画面で開かれました。二重で開く事はできません。' },
     };
-    oldConn?.close(1000, JSON.stringify(response));
+    userLogger.debug(`--> User duplicated connection`);
+    oldConn.close(1000, JSON.stringify(response));
+    oldConn.removeAllListeners();
+    oldConn.terminate();
   }
 
   userToSocketMap.set(userId, ws);
@@ -71,11 +88,11 @@ wss.on('connection', (ws, req) => {
     try {
       request = zZombalsRequest.parse(JSON.parse(data.toString()));
     } catch (e) {
-      console.warn('WebSocketServer Bad message:', data.toString(), e);
+      userLogger.warn({ request: data.toString(), error: e }, 'Bad request');
       return;
     }
 
-    console.debug('WebSocketServer Received:', request);
+    userLogger.debug({ request }, `<-- Request`);
 
     try {
       switch (request.type) {
@@ -105,11 +122,12 @@ wss.on('connection', (ws, req) => {
         }
       }
     } catch (e) {
-      console.error('Error:', e);
+      userLogger.error({ error: e, request }, 'Error while command');
+      const isForbidden = e instanceof GameForbiddenOperationError;
       send({
         type: 'DENIED',
-        reason: RequestDeniedReason.ERROR,
-        message: { ja: 'サーバーエラーが発生しました。' },
+        reason: isForbidden ? RequestDeniedReason.FORBIDDEN : RequestDeniedReason.ERROR,
+        message: { ja: isForbidden ? '不正な操作です。' : 'サーバーエラーが発生しました。' },
         commandId: request.type === 'GAME_COMMAND' ? request.command.id : undefined,
       });
     }

@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
 import { z } from 'zod';
+import { apiInputHandler } from '@/server/api/handler';
 import { getDeckById } from '@/server/db';
 import { zDeckId } from '@/types';
 
@@ -7,25 +7,12 @@ const zDeckGetParams = z.object({
   deckId: zDeckId,
 });
 
-export function deckGet(req: Request, res: Response) {
-  const parsed = zDeckGetParams.safeParse(req.params.deckId);
-  if (!parsed.success) {
-    res.status(404).json({ error: 'Not found' });
+export const deckGet = apiInputHandler(zDeckGetParams, async ({ deckId }, req, res) => {
+  const deck = await getDeckById(deckId);
+  if (!deck || deck.userId !== req.session!.userId) {
+    res.status(403).json({ error: 'Forbidden' });
     return;
   }
 
-  (async () => {
-    const { deckId } = parsed.data;
-
-    const deck = await getDeckById(deckId);
-    if (!deck || deck.userId !== req.session!.userId) {
-      res.status(403).json({ error: 'Forbidden' });
-      return;
-    }
-
-    res.status(200).json({ deck });
-  })().catch((e) => {
-    console.error(e);
-    res.status(500).json({ error: 'Failed to get deck' });
-  });
-}
+  res.status(200).json({ deck });
+});

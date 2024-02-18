@@ -515,6 +515,8 @@ export class GameServerContext implements GameContext {
     // ターン開始時のドロー
     this.ally.drawCard(1);
 
+    this.checkConditions();
+
     // タイマーをセット
     this._timer = setTimeout(() => {
       this.checkConditions();

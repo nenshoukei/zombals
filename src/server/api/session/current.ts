@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+import { apiHandler } from '@/server/api/handler';
 import { readSessionFromRequest } from '@/server/session';
 
-export function sessionCurrent(req: Request, res: Response) {
+export const sessionCurrent = apiHandler((req, res) => {
   const session = readSessionFromRequest(req);
 
   res.setHeader('Cache-Control', 'no-store');
   res.status(200).json({ session });
-}
+});

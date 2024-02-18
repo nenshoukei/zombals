@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useCurrentSession } from '@/hooks/useCurrentSession';
 import { useDeckList } from '@/hooks/useDeckList';
 import { cardRegistry } from '@/registry';
-import { CardDefinitionBase, ZombalsRequest, zZombalsResponse } from '@/types';
+import { CardDefinitionBase, GameCommandType, ZombalsRequest, zZombalsResponse } from '@/types';
 import { cardJobNameMap, cardPackNameMap, cardRarityNameMap, Job } from '@/types/common';
 
 export default function App() {
@@ -22,6 +22,7 @@ export default function App() {
     const send = (req: ZombalsRequest) => ws.send(JSON.stringify(req));
 
     ws.addEventListener('open', () => {
+      console.log('Opened');
       setMessages((messages) => [...messages, 'OPENED']);
       send({ type: 'LOBBY_ENTER', clientVersion: '1.0.0', deckId: decks[0].id });
     });
@@ -33,9 +34,17 @@ export default function App() {
       if (response.type === 'GAME_WAITING') {
         send({ type: 'GAME_START' });
       }
+      if (response.type === 'GAME_START') {
+        send({ type: 'GAME_COMMAND', command: { type: GameCommandType.MULLIGAN, swpped: [0, 1], id: 1 } });
+      }
+    });
+    ws.addEventListener('close', (ev) => {
+      console.log('Closed', ev.reason);
+      setMessages((messages) => [...messages, 'CLOSED: ' + ev.reason]);
     });
     ws.addEventListener('error', (e) => {
       console.error(e);
+      setMessages((messages) => [...messages, 'ERROR: ' + e]);
     });
   };
 

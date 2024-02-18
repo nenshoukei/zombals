@@ -44,6 +44,11 @@ export function AppHeader() {
           <NavbarItem>
             <MenuItem path="/history">対戦履歴</MenuItem>
           </NavbarItem>
+          <NavbarItem>
+            <Button variant="solid" color="primary">
+              対戦する
+            </Button>
+          </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end">
           {session ? (

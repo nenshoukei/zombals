@@ -1,7 +1,7 @@
 import { Button, Input, Link, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/react';
 import ky, { HTTPError } from 'ky';
 import { useState } from 'react';
-import { useCurrentSession } from '@/hooks/useCurrentSession';
+import { useCurrentSession } from '#/hooks/useCurrentSession';
 
 export function WelcomeModal() {
   const [isLoginMode, setLoginMode] = useState(true);

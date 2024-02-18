@@ -1,5 +1,5 @@
-import styles from './index.module.css';
-import { AppLayout } from '@/components/layout/AppLayout';
+import styles from './home.module.css';
+import { AppLayout } from '#/components/layout/AppLayout';
 
 export default function Home() {
   return (

@@ -1,9 +1,9 @@
 import { Input } from '@nextui-org/react';
 import ky from 'ky';
 import { useEffect, useState } from 'react';
-import { SaveButton, useSaveButtonState } from '@/components/form/SaveButton';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { useCurrentSession } from '@/hooks/useCurrentSession';
+import { SaveButton, useSaveButtonState } from '#/components/form/SaveButton';
+import { AppLayout } from '#/components/layout/AppLayout';
+import { useCurrentSession } from '#/hooks/useCurrentSession';
 
 export default function UserIdentify() {
   const { session, reload: reloadSession } = useCurrentSession();

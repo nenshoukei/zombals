@@ -1,8 +1,8 @@
 import { Input } from '@nextui-org/react';
 import ky from 'ky';
-import { SaveButton, useSaveButtonState } from '@/components/form/SaveButton';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { useCurrentSession } from '@/hooks/useCurrentSession';
+import { SaveButton, useSaveButtonState } from '#/components/form/SaveButton';
+import { AppLayout } from '#/components/layout/AppLayout';
+import { useCurrentSession } from '#/hooks/useCurrentSession';
 
 export default function UserEdit() {
   const { reload } = useCurrentSession();

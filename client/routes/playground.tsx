@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useCurrentSession } from '@/hooks/useCurrentSession';
-import { useDeckList } from '@/hooks/useDeckList';
+import { useCurrentSession } from '#/hooks/useCurrentSession';
+import { useDeckList } from '#/hooks/useDeckList';
 import { cardRegistry } from '@/registry';
 import { CardDefinitionBase, GameCommandType, ZombalsRequest, zZombalsResponse } from '@/types';
 import { cardJobNameMap, cardPackNameMap, cardRarityNameMap, Job } from '@/types/common';
 
-export default function App() {
+export default function Playground() {
   const { session, reload: reloadSession } = useCurrentSession();
   const [decks, reloadDecks] = useDeckList();
   const [cards, setCards] = useState<CardDefinitionBase[] | null>(null);

@@ -644,14 +644,6 @@
   dependencies:
     tslib "^2.4.0"
 
-"@generouted/react-router@^1.18.2":
-  version "1.18.2"
-  resolved "https://registry.yarnpkg.com/@generouted/react-router/-/react-router-1.18.2.tgz#6e6d897241dd31214fe95927694046fe941033bf"
-  integrity sha512-HyYgyfsEhUrAS52mtWiUPlW+QV8FVzpQhgvn51aj7htVV6mzr+Y87qOxQJs+mgI2SUTwF3OBrbAmW1irR6LaXA==
-  dependencies:
-    fast-glob "^3.3.2"
-    generouted "^1.18.2"
-
 "@humanwhocodes/config-array@^0.11.13":
   version "0.11.14"
   resolved "https://registry.npmjs.org/@humanwhocodes/config-array/-/config-array-0.11.14.tgz"
@@ -4809,7 +4801,7 @@ fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   resolved "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz"
   integrity sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==
 
-fast-glob@^3.2.12, fast-glob@^3.2.9, fast-glob@^3.3.0, fast-glob@^3.3.2:
+fast-glob@^3.2.12, fast-glob@^3.2.9, fast-glob@^3.3.0:
   version "3.3.2"
   resolved "https://registry.npmjs.org/fast-glob/-/fast-glob-3.3.2.tgz"
   integrity sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==
@@ -5047,11 +5039,6 @@ gauge@^3.0.0:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
     wide-align "^1.1.2"
-
-generouted@^1.18.2:
-  version "1.18.2"
-  resolved "https://registry.yarnpkg.com/generouted/-/generouted-1.18.2.tgz#4ffbbde4c581854507d38b83804c9b53aea14731"
-  integrity sha512-cYTSewf2Us8V+TCFUQbLTGVC6yo7ZFO0Gig2/Q+mIgKQBPJ5iaccTK/sCSj9U2cITJJQvTUnCtqdhr8zXCO89g==
 
 gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"

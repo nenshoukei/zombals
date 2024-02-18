@@ -22,7 +22,8 @@
     "noEmit": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "#/*": ["client/*"]
     },
     "outDir": "dist"
   },

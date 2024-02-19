@@ -54,12 +54,12 @@ export const getCurrentTime = () => Date.now() as Timestamp;
 export const getFutureTime = (deltaMS: number) => (Date.now() + deltaMS) as Timestamp;
 
 /** 対応言語 */
-export const zLanguage = z.enum(['ja' /* , 'en' */]);
-export type Language = z.infer<typeof zLanguage>;
+export const zLocale = z.enum(['ja' /* , 'en' */]);
+export type Locale = z.infer<typeof zLocale>;
 
 /** 言語ごとの文字列 */
 export const zLocaleString = z.object({ ja: z.string() });
-export type LocaleString = Record<Language, string>;
+export type LocaleString = Record<Locale, string>;
 
 /** 手札のインデックス */
 export type HandIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
@@ -97,7 +97,7 @@ export enum Job {
   WARRIOR = 1,
   /** 魔法使い */
   WIZARD,
-  /** 格闘家 */
+  /** 武闘家 */
   FIGHTER,
   /** 僧侶 */
   PRIEST,
@@ -112,11 +112,14 @@ export enum Job {
 }
 export const zJob = z.nativeEnum(Job);
 
+/** 職業リスト */
+export const JOBS = [Job.WARRIOR, Job.WIZARD, Job.FIGHTER, Job.PRIEST, Job.MERCHANT, Job.FORTUNE, Job.EVIL, Job.THIEF] as const;
+
 /** 職業名マップ */
 export const jobNameMap: { [k in Job]: LocaleString } = {
   [Job.WARRIOR]: { ja: '戦士' },
   [Job.WIZARD]: { ja: '魔法使い' },
-  [Job.FIGHTER]: { ja: '格闘家' },
+  [Job.FIGHTER]: { ja: '武闘家' },
   [Job.PRIEST]: { ja: '僧侶' },
   [Job.MERCHANT]: { ja: '商人' },
   [Job.FORTUNE]: { ja: '占い師' },
@@ -135,6 +138,10 @@ enum CardJobCommon {
 export type CardJob = Job | CardJobCommon;
 export const CardJob = { ...Job, ...CardJobCommon };
 
+/** カード職業リスト */
+export const CARD_JOBS = [CardJobCommon.COMMON, ...JOBS] as const;
+
+/** カード職業名マップ */
 export const cardJobNameMap: { [k in CardJob]: LocaleString } = {
   ...jobNameMap,
   [CardJob.COMMON]: { ja: '共通' },
@@ -180,6 +187,8 @@ export enum CardRarity {
 }
 export const zCardRarity = z.nativeEnum(CardRarity);
 
+export const CARD_RARITIES = [CardRarity.NORMAL, CardRarity.RARE, CardRarity.SUPER_RARE, CardRarity.LEGEND] as const;
+
 export const cardRarityNameMap: { [k in CardRarity]: LocaleString } = {
   [CardRarity.NORMAL]: { ja: 'ノーマル' },
   [CardRarity.RARE]: { ja: 'レア' },
@@ -219,6 +228,22 @@ export enum CardPack {
   PACK11,
 }
 export const zCardPack = z.nativeEnum(CardPack);
+
+export const CARD_PACKS = [
+  CardPack.BASIC,
+  CardPack.STANDARD,
+  CardPack.PACK1,
+  CardPack.PACK2,
+  CardPack.PACK3,
+  CardPack.PACK4,
+  CardPack.PACK5,
+  CardPack.PACK6,
+  CardPack.PACK7,
+  CardPack.PACK8,
+  CardPack.PACK9,
+  CardPack.PACK10,
+  CardPack.PACK11,
+] as const;
 
 export const cardPackNameMap: { [k in CardPack]: LocaleString } = {
   [CardPack.BASIC]: { ja: 'ベーシック' },

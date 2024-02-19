@@ -1,7 +1,8 @@
 import ky from 'ky';
 import { useCallback } from 'react';
-import { atom, useRecoilStateLoadable } from 'recoil';
+import { atom, useRecoilStateLoadable, useRecoilValueLoadable } from 'recoil';
 import { z } from 'zod';
+import { Locale } from '@/types';
 import { Session, zSession } from '@/types/session';
 
 const sessionState = atom<Session | null>({
@@ -58,4 +59,9 @@ export function useCurrentSession(): UseCurrentSession {
     reload,
     logout,
   };
+}
+
+export function useCurrentSesionLocale(): Locale {
+  const sessionLoadable = useRecoilValueLoadable(sessionState);
+  return (sessionLoadable.state === 'hasValue' ? sessionLoadable.contents?.locale : null) ?? 'ja';
 }

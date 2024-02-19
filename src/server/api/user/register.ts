@@ -20,6 +20,7 @@ export const userRegister = apiInputHandler(zRegisterParams, async ({ name }, re
   const session = {
     userId: user.id as UserId,
     name: user.name as UserName,
+    locale: user.locale,
     hasDeck: false,
   };
   writeSessionToRequest(res, session);

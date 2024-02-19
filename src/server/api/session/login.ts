@@ -21,6 +21,7 @@ export const sessionLogin = apiInputHandler(zLoginParams, async ({ loginId, pass
     userId: user.id as UserId,
     name: user.name as UserName,
     loginId: user.loginId as LoginId,
+    locale: user.locale,
     hasDeck: await userHasCompleteDeck(user.id),
   };
   writeSessionToRequest(res, session);

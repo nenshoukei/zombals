@@ -18,6 +18,7 @@ model User {
   name        String
   titleId     Int?         @db.UnsignedSmallInt
   rank        Int          @db.UnsignedTinyInt
+  locale      Locale       @default(ja)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   gamePlayers GamePlayer[]
@@ -25,6 +26,10 @@ model User {
 
   @@index([createdAt])
   @@index([loginId])
+}
+
+enum Locale {
+  ja
 }
 
 model Deck {

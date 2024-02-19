@@ -16,6 +16,7 @@ export const userUpdate = apiInputHandler(zUpdateParams, async (params, req, res
     userId: user.id as UserId,
     name: user.name as UserName,
     loginId: (user.loginId || undefined) as LoginId | undefined,
+    locale: user.locale,
     hasDeck: await userHasCompleteDeck(user.id),
   };
   writeSessionToRequest(res, session);

@@ -1,12 +1,14 @@
-import { Button, Input, Link, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/react';
+import { Input, Link, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/react';
 import ky, { HTTPError } from 'ky';
 import { useState } from 'react';
+import { SaveButton, useSaveButtonState } from '#/components/form/SaveButton';
 import { useCurrentSession } from '#/hooks/useCurrentSession';
 
 export function WelcomeModal() {
   const [isLoginMode, setLoginMode] = useState(true);
   const [formErrors, setFormErrors] = useState<Record<string, string | undefined>>({});
   const { reload: reloadSession } = useCurrentSession();
+  const [buttonState, setButtonState] = useSaveButtonState();
 
   const toggleLoginMode = () => {
     setLoginMode(!isLoginMode);
@@ -19,13 +21,16 @@ export function WelcomeModal() {
     const name = data.get('name');
     if (name === '') return;
 
+    setButtonState('submitting');
     ky.post('/api/user/register', { json: { name } })
       .json()
       .then(() => {
         reloadSession();
+        setButtonState('success');
       })
       .catch((err) => {
         console.error(err);
+        setButtonState('error');
         if (err.name === 'HTTPError' && (err as HTTPError).response.status === 400) {
           setFormErrors({ name: '不正な名前です' });
         }
@@ -39,13 +44,16 @@ export function WelcomeModal() {
     const password = data.get('password');
     if (loginId === '' || password === '') return;
 
+    setButtonState('submitting');
     ky.post('/api/session/login', { json: { loginId, password } })
       .json()
       .then(() => {
         reloadSession();
+        setButtonState('success');
       })
       .catch(async (err) => {
         console.error(err);
+        setButtonState('error');
         if (err.name === 'HTTPError' && (err as HTTPError).response.status === 400) {
           setFormErrors({ login: 'ログインIDまたはパスワードが違います' });
         }
@@ -126,9 +134,15 @@ export function WelcomeModal() {
               </Link>
             </div>
 
-            <Button color="primary" type="submit" size="lg">
+            <SaveButton
+              state={buttonState}
+              color="primary"
+              type="submit"
+              size="lg"
+              successLabel={isLoginMode ? 'ログインしました' : '登録しました'}
+            >
               {isLoginMode ? 'ログイン' : 'はじめる'}
-            </Button>
+            </SaveButton>
           </ModalFooter>
         </form>
       </ModalContent>

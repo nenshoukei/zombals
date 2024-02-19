@@ -1,4 +1,4 @@
-import { Button } from '@nextui-org/react';
+import { Button, ButtonProps } from '@nextui-org/react';
 import { useEffect, useState } from 'react';
 
 export type SaveButtonState = 'initial' | 'submitting' | 'success' | 'error';
@@ -7,7 +7,7 @@ export function useSaveButtonState() {
   const [saveButtonState, setSaveButtonState] = useState<SaveButtonState>('initial');
 
   useEffect(() => {
-    if (saveButtonState === 'success') {
+    if (saveButtonState === 'success' || saveButtonState === 'error') {
       const timer = setTimeout(() => {
         setSaveButtonState('initial');
       }, 3000);
@@ -20,7 +20,13 @@ export function useSaveButtonState() {
   return [saveButtonState, setSaveButtonState] as const;
 }
 
-export function SaveButton({ state }: { state: SaveButtonState }) {
+export type SaveButtonProps = ButtonProps & {
+  state: SaveButtonState;
+  successLabel?: React.ReactNode;
+  errorLabel?: React.ReactNode;
+};
+
+export function SaveButton({ state, successLabel, errorLabel, children, ...props }: SaveButtonProps) {
   return (
     <Button
       type="submit"
@@ -37,8 +43,15 @@ export function SaveButton({ state }: { state: SaveButtonState }) {
       }
       size="lg"
       className="mx-auto"
+      {...props}
     >
-      {state === 'success' ? <>保存しました</> : state === 'error' ? <>エラーが発生しました</> : <>保存</>}
+      {state === 'success' ? (
+        <>{successLabel || '保存しました'}</>
+      ) : state === 'error' ? (
+        <>{errorLabel || 'エラーが発生しました'}</>
+      ) : (
+        <>{children}</>
+      )}
     </Button>
   );
 }

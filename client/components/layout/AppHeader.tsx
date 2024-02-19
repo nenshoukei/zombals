@@ -45,7 +45,7 @@ export function AppHeader() {
             <MenuItem path="/history">対戦履歴</MenuItem>
           </NavbarItem>
           <NavbarItem>
-            <Button variant="solid" color="primary">
+            <Button variant="solid" color="primary" isDisabled={!session?.hasDeck}>
               対戦する
             </Button>
           </NavbarItem>

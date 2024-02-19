@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { apiInputHandler } from '@/server/api/handler';
-import { login } from '@/server/db';
+import { login, userHasCompleteDeck } from '@/server/db';
 import { writeSessionToRequest } from '@/server/session';
 import { LoginId, UserId, UserName, zLoginId, zRawPassword } from '@/types/common';
 
@@ -21,6 +21,7 @@ export const sessionLogin = apiInputHandler(zLoginParams, async ({ loginId, pass
     userId: user.id as UserId,
     name: user.name as UserName,
     loginId: user.loginId as LoginId,
+    hasDeck: await userHasCompleteDeck(user.id),
   };
   writeSessionToRequest(res, session);
   req.logger?.debug({ session }, 'Logged in');

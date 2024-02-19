@@ -132,6 +132,20 @@ export async function getDeckById(deckId: DeckId): Promise<Deck | null> {
   return deck;
 }
 
+/**
+ * ユーザーが有効なデッキを持っているかどうか確認する。
+ */
+export async function userHasCompleteDeck(userId: UserId): Promise<boolean> {
+  const count = await prisma.deck.count({
+    where: {
+      userId,
+      isComplete: true,
+    },
+    take: 1,
+  });
+  return count > 0;
+}
+
 export type ListedDeck = Pick<Deck, 'id' | 'userId' | 'name' | 'job' | 'isComplete' | 'createdAt' | 'updatedAt'>;
 
 /**

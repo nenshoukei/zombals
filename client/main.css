@@ -8,3 +8,28 @@ html.light {
 html.dark {
   background: #292929;
 }
+
+.job-bg-1 {
+  background-image: url(/assets/leader/job-1.webp);
+}
+.job-bg-2 {
+  background-image: url(/assets/leader/job-2.webp);
+}
+.job-bg-3 {
+  background-image: url(/assets/leader/job-3.webp);
+}
+.job-bg-4 {
+  background-image: url(/assets/leader/job-4.webp);
+}
+.job-bg-5 {
+  background-image: url(/assets/leader/job-5.webp);
+}
+.job-bg-6 {
+  background-image: url(/assets/leader/job-6.webp);
+}
+.job-bg-7 {
+  background-image: url(/assets/leader/job-7.webp);
+}
+.job-bg-8 {
+  background-image: url(/assets/leader/job-8.webp);
+}

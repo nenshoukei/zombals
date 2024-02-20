@@ -7,7 +7,7 @@ import { cardJobNameMap, cardPackNameMap, cardRarityNameMap, Job } from '@/types
 
 export default function Playground() {
   const { session, reload: reloadSession } = useCurrentSession();
-  const [decks, reloadDecks] = useDeckList();
+  const { decks, mutate: reloadDecks } = useDeckList();
   const [cards, setCards] = useState<CardDefinitionBase[] | null>(null);
 
   const [messages, setMessages] = useState<string[]>([]);

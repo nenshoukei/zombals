@@ -1,20 +1,24 @@
-import { useEffect, useState } from 'react';
-import type { ListedDeck } from '@/server/db';
+import useSWR, { KeyedMutator } from 'swr';
+import { z } from 'zod';
+import { ListedDeck, zListedDeck } from '@/types';
 
-export function useDeckList(): [ListedDeck[] | null, () => void] {
-  const [decks, setDecks] = useState<ListedDeck[] | null>(null);
+const zDecksResponse = z.object({
+  decks: z.array(zListedDeck),
+});
+type DecksResponse = z.infer<typeof zDecksResponse>;
 
-  const reload = () => {
-    fetch('/api/deck/all', { method: 'GET', credentials: 'same-origin' })
-      .then((res) => res.json())
-      .then((data) => {
-        setDecks(data.decks);
-      });
+export interface UseDeckList {
+  isLoading: boolean;
+  decks: ListedDeck[] | undefined;
+  mutate: KeyedMutator<DecksResponse>;
+}
+
+export function useDeckList(): UseDeckList {
+  const { data, isLoading, mutate } = useSWR<DecksResponse>('/api/deck/all');
+
+  return {
+    isLoading,
+    decks: data ? data.decks : undefined,
+    mutate,
   };
-
-  useEffect(() => {
-    reload();
-  }, []);
-
-  return [decks, reload];
 }

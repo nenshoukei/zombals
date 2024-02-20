@@ -10,6 +10,7 @@ export default function UserIdentify() {
   const [saveButtonState, setSaveButtonState] = useSaveButtonState();
 
   const [loginIdAvailable, setLoginIdAvailable] = useState<boolean | null>(null);
+
   const [bouncedLoginId, setBouncedLoginId] = useState<string>('');
   const checkLoginIdBounced = (value: string) => {
     if (value === '') {
@@ -97,7 +98,7 @@ export default function UserIdentify() {
               autoComplete="new-password"
               endContent={<span className="icon-[mdi--password] text-4xl text-default-400 pointer-events-none" />}
             />
-            <SaveButton state={saveButtonState} />
+            <SaveButton state={saveButtonState} size="lg" className="mx-auto min-w-40" />
           </div>
         </form>
       </div>

@@ -19,13 +19,6 @@ export const zUserName = z
   .refine((v): v is UserName => true);
 export type UserName = string;
 
-/** デッキID */
-export const zDeckId = z
-  .string()
-  .uuid()
-  .refine((v): v is DeckId => true);
-export type DeckId = string;
-
 /** ログインID */
 export const zLoginId = z
   .string()
@@ -172,6 +165,18 @@ export enum CardType {
 }
 export const zCardType = z.nativeEnum(CardType);
 
+export const cardTypeNameMap: { [k in CardType]: LocaleString } = {
+  [CardType.UNIT]: { ja: 'ユニット' },
+  [CardType.SPELL]: { ja: '特技' },
+  [CardType.WEAPON]: { ja: '武器' },
+  [CardType.HERO]: { ja: 'ヒーロー' },
+  [CardType.BUILDING]: { ja: '建物' },
+  [CardType.TENTION_SKILL]: { ja: 'テンションスキル' },
+  [CardType.HERO_SKILL]: { ja: 'ヒーロースキル' },
+  [CardType.MASKED]: { ja: 'マスク状態' },
+  [CardType.FATIGUE]: { ja: 'ファティーグ' },
+};
+
 /**
  * カードのレアリティ
  */
@@ -279,6 +284,8 @@ export enum UnitKind {
   ADVENTURER,
 }
 export const zUnitKind = z.nativeEnum(UnitKind);
+
+export const UNIT_KINDS = [UnitKind.NONE, UnitKind.ZOMBIE, UnitKind.SLIME, UnitKind.DRAGON, UnitKind.DEVIL, UnitKind.ADVENTURER] as const;
 
 export const unitKindNameMap: { [k in UnitKind]: LocaleString } = {
   [UnitKind.NONE]: { ja: '系統なし' },

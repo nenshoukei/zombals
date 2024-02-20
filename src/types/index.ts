@@ -2,6 +2,7 @@
 
 export * from './animation';
 export * from './common';
+export * from './deck';
 export * from './errors';
 export * from './field';
 export * from './game_record';

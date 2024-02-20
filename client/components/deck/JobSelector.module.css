@@ -1,0 +1,33 @@
+.selected {
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.radio {
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.radio:global(.job-bg-1) {
+  background-position: 40px -60px;
+}
+.radio:global(.job-bg-2) {
+  background-position: 70px -65px;
+}
+.radio:global(.job-bg-3) {
+  background-position: 60px -55px;
+}
+.radio:global(.job-bg-4) {
+  background-position: 50px -55px;
+}
+.radio:global(.job-bg-5) {
+  background-position: 85px -38px;
+}
+.radio:global(.job-bg-6) {
+  background-position: 60px -75px;
+}
+.radio:global(.job-bg-7) {
+  background-position: 50px -50px;
+}
+.radio:global(.job-bg-8) {
+  background-position: 70px -90px;
+}

@@ -1,5 +1,8 @@
 import { createBrowserRouter } from 'react-router-dom';
-import ErrorPage from '#/error-page';
+import RouteErrorPage from '#/components/error-page/RouteErrorPage';
+import DeckIndex from '#/routes/deck';
+import DeckEdit from '#/routes/deck/edit';
+import DeckNew from '#/routes/deck/new';
 import Home from '#/routes/home';
 import Playground from '#/routes/playground';
 import { Root } from '#/routes/root';
@@ -10,7 +13,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
-    errorElement: <ErrorPage />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         path: '/',
@@ -27,6 +30,18 @@ export const router = createBrowserRouter([
       {
         path: '/user/identify',
         element: <UserIdentify />,
+      },
+      {
+        path: '/deck',
+        element: <DeckIndex />,
+      },
+      {
+        path: '/deck/new',
+        element: <DeckNew />,
+      },
+      {
+        path: '/deck/:deckId',
+        element: <DeckEdit />,
       },
     ],
   },

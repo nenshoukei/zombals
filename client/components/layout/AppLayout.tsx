@@ -8,21 +8,26 @@ const darkModeConfig: DarkModeConfig = {
   element: document.documentElement,
 };
 
-export function AppLayout({ children }: { children: React.ReactNode | React.ReactNode[] }) {
+export type AppLayoutProps = {
+  size?: 'md' | 'lg';
+  children: React.ReactNode | React.ReactNode[];
+};
+
+export function AppLayout({ size, children }: AppLayoutProps) {
   const darkMode = useDarkMode(false, darkModeConfig);
 
   return (
     <div className="relative">
-      <div className="container mx-auto px-1 py-4 max-w-4xl flex flex-col items-center min-h-dvh">
+      <div className={`container mx-auto py-4 flex flex-col items-center min-h-dvh ${size === 'lg' ? 'px-16' : 'px-1 max-w-4xl'}`}>
         <div
-          className={`${darkMode.value ? 'dark' : ''} bg-default-50 text-foreground flex flex-col box-border outline-none w-full my-auto min-h-unit-9xl rounded-large shadow-small`}
+          className={`${darkMode.value ? 'dark' : ''} bg-default-50 text-foreground flex flex-col box-border outline-none w-full rounded-large shadow-small ${size === 'lg' ? '' : 'my-auto min-h-unit-9xl'}`}
         >
           <AppHeader />
           {children}
         </div>
       </div>
 
-      <div className="absolute right-5 top-5">
+      <div className="absolute right-4 top-4">
         <Button isIconOnly variant="ghost" onClick={darkMode.toggle} aria-label="テーマをダークモードとライトモードで切り替えます">
           {darkMode?.value ? (
             <span className="icon-[mdi--white-balance-sunny] text-2xl" />

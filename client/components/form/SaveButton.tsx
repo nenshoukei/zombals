@@ -30,27 +30,25 @@ export function SaveButton({ state, successLabel, errorLabel, children, ...props
   return (
     <Button
       type="submit"
-      color={state === 'success' ? 'success' : state === 'error' ? 'danger' : 'primary'}
       isLoading={state === 'submitting'}
+      {...props}
+      color={state === 'success' ? 'success' : state === 'error' ? 'danger' : props.color || 'primary'}
       startContent={
         state === 'success' ? (
           <span className="icon-[mdi--check] text-2xl" />
         ) : state === 'error' ? (
           <span className="icon-[mdi--alert-circle] text-2xl" />
         ) : (
-          <></>
+          props.startContent
         )
       }
-      size="lg"
-      className="mx-auto"
-      {...props}
     >
       {state === 'success' ? (
         <>{successLabel || '保存しました'}</>
       ) : state === 'error' ? (
         <>{errorLabel || 'エラーが発生しました'}</>
       ) : (
-        <>{children}</>
+        <>{children || '保存'}</>
       )}
     </Button>
   );

@@ -46,7 +46,7 @@ export default function UserEdit() {
               autoComplete="off"
               endContent={<span className="icon-[mdi--account-circle] text-4xl text-default-400 pointer-events-none" />}
             />
-            <SaveButton state={saveButtonState} />
+            <SaveButton state={saveButtonState} size="lg" className="mx-auto min-w-40" />
           </div>
         </form>
       </div>

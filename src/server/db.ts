@@ -146,12 +146,12 @@ export async function userHasCompleteDeck(userId: UserId): Promise<boolean> {
   return count > 0;
 }
 
-export type ListedDeck = Pick<Deck, 'id' | 'userId' | 'name' | 'job' | 'isComplete' | 'createdAt' | 'updatedAt'>;
+export type PListedDeck = Pick<Deck, 'id' | 'userId' | 'name' | 'job' | 'isComplete' | 'createdAt' | 'updatedAt'>;
 
 /**
  * ユーザーのデッキを全て取得する。
  */
-export async function getAllDecksByUserId(userId: UserId): Promise<ListedDeck[]> {
+export async function getAllDecksByUserId(userId: UserId): Promise<PListedDeck[]> {
   const decks = await prisma.deck.findMany({
     select: {
       id: true,
@@ -212,22 +212,22 @@ export async function isOwnerOfDeck(userId: UserId, deckId: DeckId): Promise<boo
 }
 
 export interface UpdateDeckParams {
-  name: string;
-  cardDefIds: Id[];
+  name?: string;
+  cardDefIds?: Id[];
 }
 
 /**
  * デッキを更新する。
  */
-export async function updateDeck(deckId: DeckId, params: UpdateDeckParams): Promise<Deck> {
+export async function updateDeck(deckId: DeckId, { name, cardDefIds }: UpdateDeckParams): Promise<Deck> {
   const deck = await prisma.deck.update({
     where: {
       id: deckId,
     },
     data: {
-      name: params.name,
-      cardDefIds: params.cardDefIds,
-      isComplete: params.cardDefIds.length === DECK_CARD_NUM,
+      name,
+      cardDefIds,
+      isComplete: cardDefIds ? cardDefIds.length === DECK_CARD_NUM : undefined,
     },
   });
   return deck;

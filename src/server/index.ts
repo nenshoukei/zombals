@@ -16,10 +16,11 @@ const PORT = parseInt(process.env.PORT || '8080', 10);
 
 const app = express();
 app.disable('x-powered-by');
+app.use(express.static(__dirname + '/client/public'));
+app.use(ViteExpress.static());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use(ViteExpress.static());
 
 app.use(
   pinoHttp({

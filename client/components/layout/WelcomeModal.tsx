@@ -134,13 +134,7 @@ export function WelcomeModal() {
               </Link>
             </div>
 
-            <SaveButton
-              state={buttonState}
-              color="primary"
-              type="submit"
-              size="lg"
-              successLabel={isLoginMode ? 'ログインしました' : '登録しました'}
-            >
+            <SaveButton state={buttonState} size="lg" successLabel={isLoginMode ? 'ログインしました' : '登録しました'}>
               {isLoginMode ? 'ログイン' : 'はじめる'}
             </SaveButton>
           </ModalFooter>

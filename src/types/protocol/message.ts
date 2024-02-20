@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { zDeckId, zId, zLocaleString, zTimestamp, zUserId } from '../common';
+import { zId, zLocaleString, zTimestamp, zUserId } from '../common';
+import { zDeckId } from '../deck';
 import { zLeaderMap } from '../field';
 import { zGameAction } from './game_action';
 import { zGameCommand } from './game_command';

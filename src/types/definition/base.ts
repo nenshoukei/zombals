@@ -40,6 +40,8 @@ export interface DefinitionClass<T extends Definition> {
  * カード定義情報の共通部分
  */
 export interface CardDefinitionBase<TState extends CardState = CardState> extends Definition {
+  /** カード種別 */
+  type: TState['type'];
   /** カード名 */
   name: LocaleString;
   /** カード説明 (リッチテキスト) */

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { DECK_CARD_NUM } from '@/config/common';
 import { validateDeck } from '@/game/validate_deck';
 import { apiInputHandler } from '@/server/api/handler';
 import { createDeck } from '@/server/db';
@@ -8,7 +7,7 @@ import { zId, zJob } from '@/types';
 const zDeckCreateParams = z.object({
   name: z.string().min(1),
   job: zJob,
-  cardDefIds: z.array(zId).max(DECK_CARD_NUM), // 不完全でも保存できる
+  cardDefIds: z.array(zId), // 不完全でも保存できる
 });
 
 export const deckCreate = apiInputHandler(zDeckCreateParams, async ({ name, job, cardDefIds }, req, res) => {

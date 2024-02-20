@@ -23,9 +23,13 @@ async function initSession(): Promise<Session | null> {
   return await loadSession();
 }
 
+const zResponse = z.object({
+  session: zSession.nullable(),
+});
+
 async function loadSession(): Promise<Session | null> {
   const data = await ky.get('/api/session/current').json();
-  const parsed = z.object({ session: zSession.nullable() }).parse(data);
+  const parsed = zResponse.parse(data);
   localStorage.setItem('session', JSON.stringify(parsed.session));
   return parsed.session;
 }

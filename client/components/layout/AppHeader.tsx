@@ -15,8 +15,9 @@ import { useCurrentSession } from '#/hooks/useCurrentSession';
 
 const MenuItem = ({ path, children }: { path: string; children: React.ReactNode }) => {
   const location = useLocation();
+  const isCurrent = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
   return (
-    <Button variant={location.pathname === path ? 'flat' : 'light'} as={Link} to={path}>
+    <Button variant={isCurrent ? 'flat' : 'light'} as={Link} to={path}>
       {children}
     </Button>
   );

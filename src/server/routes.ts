@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { deckAll } from '@/server/api/deck/all';
+import { deckCopy } from '@/server/api/deck/copy';
 import { deckCreate } from '@/server/api/deck/create';
 import { deckDelete } from '@/server/api/deck/delete';
 import { deckGet } from '@/server/api/deck/get';
@@ -29,6 +30,7 @@ routes.get('/api/deck/all', authMiddleware, deckAll);
 routes.post('/api/deck/create', authMiddleware, deckCreate);
 routes.post('/api/deck/update', authMiddleware, deckUpdate);
 routes.post('/api/deck/delete', authMiddleware, deckDelete);
+routes.post('/api/deck/copy', authMiddleware, deckCopy);
 
 routes.use((req, res, next) => {
   if (req.path.startsWith('/api/')) {

@@ -8,16 +8,12 @@ export default function Home() {
   const { session } = useCurrentSession();
   return (
     <AppLayout>
-      <section className={`${styles.home} grow rounded-b-large relative`}>
-        <div className="backdrop-blur-md backdrop-brightness-50 text-white w-3/5 mt-5 ml-5 p-5">
+      <section className={`${styles.home} grow md:rounded-b-large relative flex flex-col justify-center`}>
+        <div className="rounded-large backdrop-blur-md backdrop-brightness-50 text-white w-3/5 mt-5 ml-5 p-5">
           <h2 className="text-2xl mb-2">ようこそ ZOMBALS へ</h2>
           {session?.hasDeck ? (
             <>
-              <p>
-                他のデッキを使いたい時は、上のメニューの「デッキ編集」から
-                <br />
-                新しいデッキを作成してください。
-              </p>
+              <p>他のデッキを使いたい時は、メニューの「デッキ編集」から 新しいデッキを作成してください。</p>
             </>
           ) : (
             <>

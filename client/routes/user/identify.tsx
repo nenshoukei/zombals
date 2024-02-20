@@ -66,8 +66,8 @@ export default function UserIdentify() {
 
   return (
     <AppLayout>
-      <div className="p-3">
-        <h1 className="text-center text-2xl mt-5">ログインIDとパスワードの{session?.loginId ? '変更' : '設定'}</h1>
+      <div className="md:p-3">
+        <h1 className="text-center text-2xl mt-3 md:mt-5">ログインIDとパスワードの{session?.loginId ? '変更' : '設定'}</h1>
 
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col mt-10 w-3/5 mx-auto gap-5">

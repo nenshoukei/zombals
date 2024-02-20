@@ -1,3 +1,4 @@
+import { DarkMode } from '@fisch0920/use-dark-mode';
 import {
   Button,
   Dropdown,
@@ -23,12 +24,16 @@ const MenuItem = ({ path, children }: { path: string; children: React.ReactNode 
   );
 };
 
-export function AppHeader() {
+export type AppHeaderProps = {
+  darkMode: DarkMode;
+};
+
+export function AppHeader({ darkMode }: AppHeaderProps) {
   const { isLoading, session, logout } = useCurrentSession();
   const navigate = useNavigate();
 
   return (
-    <header className="flex items-center justify-between p-2">
+    <header className="flex items-center justify-between p-0 md:p-2">
       {!isLoading && !session ? <WelcomeModal /> : null}
 
       <Navbar className="rounded-lg bg-transparent">
@@ -56,7 +61,7 @@ export function AppHeader() {
             <NavbarItem>
               <Dropdown placement="bottom-end">
                 <DropdownTrigger>
-                  <Button variant="flat" startContent={<span className="icon-[mdi--account-circle] text-2xl" />}>
+                  <Button variant="flat" startContent={<span className="icon-[mdi--account-circle] text-2xl hidden md:inline" />}>
                     {session.name}
                   </Button>
                 </DropdownTrigger>
@@ -76,6 +81,19 @@ export function AppHeader() {
                     textValue={`ログインIDとパスワードを${session.loginId ? '変更' : '設定'}`}
                   >
                     ログインIDとパスワードを{session.loginId ? '変更' : '設定'}
+                  </DropdownItem>
+                  <DropdownItem
+                    key="theme"
+                    onPress={darkMode.toggle}
+                    startContent={
+                      darkMode.value ? (
+                        <span className="icon-[mdi--power-sleep] text-2xl" />
+                      ) : (
+                        <span className="icon-[mdi--white-balance-sunny] text-2xl" />
+                      )
+                    }
+                  >
+                    ラナルータ
                   </DropdownItem>
                   <DropdownItem
                     key="logout"

@@ -1,0 +1,6 @@
+.logo {
+  background-image: url(/assets/zombals-logo.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  color: transparent;
+}

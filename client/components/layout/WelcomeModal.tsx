@@ -1,6 +1,7 @@
 import { Input, Link, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@nextui-org/react';
 import ky, { HTTPError } from 'ky';
 import { useState } from 'react';
+import styles from './WelcomeModal.module.css';
 import { SaveButton, useSaveButtonState } from '#/components/form/SaveButton';
 import { useCurrentSession } from '#/hooks/useCurrentSession';
 
@@ -65,7 +66,7 @@ export function WelcomeModal() {
       <ModalContent>
         <form onSubmit={isLoginMode ? handleLoginSubmit : handleRegisterSubmit}>
           <ModalHeader className="place-content-center">
-            <img src="/assets/zombals-logo.svg" alt="ZOMBALS ぞんばるず" width="360" height="170" />
+            <div className={`${styles.logo} w-[180px] h-[85px] md:w-[360px] md:h-[170px]`}>ZOMBALS</div>
           </ModalHeader>
           <ModalBody>
             {isLoginMode ? (

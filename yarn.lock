@@ -670,6 +670,13 @@
   dependencies:
     "@iconify/types" "*"
 
+"@iconify-json/zondicons@^1.1.8":
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/@iconify-json/zondicons/-/zondicons-1.1.8.tgz#ae03d41d631c6682366e752bec6e1b63a573551a"
+  integrity sha512-zT824sPnuPqL0iYx4Ru2ZzaZA74BF0hPEayAH/hMPesOsEEEA7zrcJ/Rbdfc2haV8a6d9Qrf6La6Mr2NyIgC7g==
+  dependencies:
+    "@iconify/types" "*"
+
 "@iconify/tailwind@^0.1.4":
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/@iconify/tailwind/-/tailwind-0.1.4.tgz#c5baee6e863d01d7b1d5ff3f0c5cd4fc49b2c0c7"

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { sortCardDefinitionIds } from '@/definition/sort';
 import { validateDeck } from '@/game/validate_deck';
 import { apiInputHandler } from '@/server/api/handler';
 import { createDeck } from '@/server/db';
@@ -18,7 +19,14 @@ export const deckCreate = apiInputHandler(zDeckCreateParams, async ({ name, job,
     return;
   }
 
-  const deck = await createDeck({ userId: req.session!.userId, name, job, cardDefIds });
+  const sortedCardDefIds = sortCardDefinitionIds(cardDefIds);
+
+  const deck = await createDeck({
+    userId: req.session!.userId,
+    name,
+    job,
+    cardDefIds: sortedCardDefIds,
+  });
   req.logger?.debug({ deck }, 'Created deck');
   res.status(201).json({ deck });
 });

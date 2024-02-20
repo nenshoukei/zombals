@@ -1,9 +1,10 @@
-import { Button, Card, CardBody, CardFooter, Select, SelectItem, SelectProps } from '@nextui-org/react';
+import { Button, Card, CardBody, CardFooter, CircularProgress, Select, SelectItem, SelectProps, Tooltip } from '@nextui-org/react';
 import ky from 'ky';
-import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+import DeckViewModal from '#/components/deck/DeckViewModal';
 import { useDeckList } from '#/hooks/useDeckList';
-import { ListedDeck } from '@/types';
+import { DeckId, ListedDeck } from '@/types';
 
 const deckListSortOptions = [
   ['新しい順', 'createdAt:desc', (a: ListedDeck, b: ListedDeck) => Date.parse(b.createdAt) - Date.parse(a.createdAt)],
@@ -32,7 +33,8 @@ export type DeckListProps = {
 };
 
 export default function DeckList({ sort }: DeckListProps) {
-  const { decks, mutate: mutateDecks } = useDeckList();
+  const { decks, isLoading, mutate: mutateDecks } = useDeckList();
+  const [viewDeckId, setViewDeckId] = useState<DeckId | null>(null);
 
   const handleRemoveDeck = (deck: ListedDeck) => {
     if (!confirm(`デッキ「${deck.name}」を削除します。\n\n本当によろしいですか？`)) return;
@@ -59,6 +61,9 @@ export default function DeckList({ sort }: DeckListProps) {
     return [...decks].sort((a, b) => comparer(a, b));
   }, [sort, decks]);
 
+  if (isLoading) {
+    return <CircularProgress />;
+  }
   if (!sortedDecks) return null;
   return (
     <div className="flex flex-wrap gap-5 justify-between after:w-64 after:h-0 after:block">
@@ -66,30 +71,35 @@ export default function DeckList({ sort }: DeckListProps) {
         <div key={deck.id} className={`job-bg-${deck.job} bg-no-repeat bg-cover bg-[-5rem_-0.5rem] rounded-large`}>
           <Card shadow="md" className="w-64 bg-white/70 bg-blend-lighten dark:bg-black/70 dark:bg-blend-darken">
             <CardBody>
-              <Link
+              <RouterLink
                 to={`/deck/${deck.id}`}
-                className="text-foreground text-xl font-bold w-56 overflow-hidden whitespace-nowrap text-ellipsis"
+                className="text-foreground text-xl font-bold w-56 overflow-hidden whitespace-nowrap text-ellipsis cursor-pointer hover:underline"
               >
                 {deck.name}
-              </Link>
+              </RouterLink>
             </CardBody>
             <CardFooter className="px-2 pb-2 pt-0 justify-end gap-2">
-              <Button
-                color="primary"
-                variant="solid"
-                startContent={<span className="icon-[mdi--edit] text-2xl" />}
-                as={Link}
-                to={`/deck/${deck.id}`}
-              >
-                編集
-              </Button>
-              <Button isIconOnly color="danger" variant="ghost" onPress={() => handleRemoveDeck(deck)}>
-                <span className="icon-[mdi--trash] text-2xl" />
-              </Button>
+              <Tooltip content="デッキを一覧表示">
+                <Button isIconOnly size="sm" color="default" variant="ghost" onPress={() => setViewDeckId(deck.id)}>
+                  <span className="icon-[zondicons--view-tile]" />
+                </Button>
+              </Tooltip>
+              <Tooltip content="デッキを編集">
+                <Button isIconOnly size="sm" color="primary" variant="ghost" as={RouterLink} to={`/deck/${deck.id}`}>
+                  <span className="icon-[mdi--edit] text-2xl" />
+                </Button>
+              </Tooltip>
+              <Tooltip content="デッキを削除">
+                <Button isIconOnly size="sm" color="danger" variant="ghost" onPress={() => handleRemoveDeck(deck)}>
+                  <span className="icon-[mdi--trash] text-2xl" />
+                </Button>
+              </Tooltip>
             </CardFooter>
           </Card>
         </div>
       ))}
+
+      {viewDeckId ? <DeckViewModal deckId={viewDeckId} isOpen onClose={() => setViewDeckId(null)} /> : null}
     </div>
   );
 }

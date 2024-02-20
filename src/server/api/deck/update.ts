@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { sortCardDefinitionIds } from '@/definition/sort';
 import { validateDeck } from '@/game';
 import { apiInputHandler } from '@/server/api/handler';
 import { getDeckById, updateDeck } from '@/server/db';
-import { zDeckId, zId } from '@/types';
+import { Id, zDeckId, zId } from '@/types';
 
 const zDeckUpdateParams = z.object({
   deckId: zDeckId,
@@ -23,6 +24,7 @@ export const deckUpdate = apiInputHandler(zDeckUpdateParams, async ({ deckId, na
     return;
   }
 
+  let updateCardDefIds: Id[] | undefined;
   if (cardDefIds) {
     const result = validateDeck(cardDefIds, existDeck.job);
     if (!result.success) {
@@ -30,9 +32,10 @@ export const deckUpdate = apiInputHandler(zDeckUpdateParams, async ({ deckId, na
       res.status(400).json({ error: result.message });
       return;
     }
+    updateCardDefIds = sortCardDefinitionIds(cardDefIds);
   }
 
-  const deck = await updateDeck(deckId, { name, cardDefIds });
+  const deck = await updateDeck(deckId, { name, cardDefIds: updateCardDefIds });
   req.logger?.debug({ deck }, 'Updated deck');
   res.status(200).json({ deck });
 });

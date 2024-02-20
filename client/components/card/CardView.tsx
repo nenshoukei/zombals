@@ -16,7 +16,7 @@ import {
 } from '@/types';
 
 export type CardViewProps = {
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   cardDefId: Id;
   description?: LocaleString;
   unitPower?: number;

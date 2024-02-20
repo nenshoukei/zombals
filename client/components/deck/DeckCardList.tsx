@@ -6,9 +6,8 @@ import { useCurrentSesionLocale } from '#/hooks/useCurrentSession';
 import { cardRegistry } from '@/registry';
 import { CardDefinitionBase, CardRarity, Id } from '@/types';
 
-export type DeckListProps = {
+export type DeckCardListProps = {
   cardDefIds: Id[];
-  isSortedByCost?: boolean;
   highlightCardDefId?: Id;
   errorCardDefId?: Id;
   canEdit?: boolean;
@@ -18,13 +17,12 @@ export type DeckListProps = {
 
 export default function DeckCardList({
   cardDefIds,
-  isSortedByCost,
   highlightCardDefId,
   errorCardDefId,
   canEdit,
   onAddCard,
   onRemoveCard,
-}: DeckListProps) {
+}: DeckCardListProps) {
   const locale = useCurrentSesionLocale();
 
   const cardDefEntries = useMemo(() => {
@@ -36,13 +34,8 @@ export default function DeckCardList({
         map.set(cardDefId, { id: cardDefId, count: 1, def: cardRegistry.getById(cardDefId) });
       }
     });
-    const entries = [...map.values()];
-
-    if (isSortedByCost) {
-      entries.sort((a, b) => a.def.cost - b.def.cost || a.id - b.id);
-    }
-    return entries;
-  }, [cardDefIds, isSortedByCost]);
+    return [...map.values()];
+  }, [cardDefIds]);
 
   return (
     <div className={styles.container}>

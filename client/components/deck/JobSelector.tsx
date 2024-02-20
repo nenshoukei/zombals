@@ -26,6 +26,7 @@ export function JobSelector({ onSelect }: JobSelectorProps) {
         aria-label="職業の選択リスト"
         value={String(selectedJob ?? '')}
         onChange={(ev) => setSelectedJob(parseInt(ev.target.value, 10) as Job)}
+        classNames={{ wrapper: 'gap-1 md:gap-2' }}
       >
         {JOBS.map((job) => (
           <CustomRadio key={job} job={job} value={String(job)}>
@@ -36,7 +37,9 @@ export function JobSelector({ onSelect }: JobSelectorProps) {
 
       {selectedJob ? (
         <div className={`${styles.selected} ${selectedJob ? `job-bg-${selectedJob}` : ''} flex-1 flex flex-col justify-end`}>
-          <div className="bg-opacity-80 bg-default-100 rounded-lg mx-5 px-4 py-2">{jobDescriptionMap[selectedJob]}</div>
+          <div className="bg-opacity-80 bg-default-100 rounded-lg mx-5 px-4 py-2 text-sm md:text-medium">
+            {jobDescriptionMap[selectedJob]}
+          </div>
           <Button
             variant="solid"
             color="primary"
@@ -65,8 +68,8 @@ const CustomRadio = ({ job, children, ...props }: { job: Job } & RadioProps) => 
           'cursor-pointer rounded-lg py-0 px-2 border-2 border-transparent',
           'data-[selected=true]:border-primary min-w-[300px]',
         ),
-        labelWrapper: 'bg-default/80 px-2 py-1 rounded-lg',
-        label: 'text-2xl',
+        labelWrapper: 'bg-default/80 px-2 md:py-1 rounded-lg',
+        label: 'text-xl md:text-2xl',
       }}
     >
       {children}

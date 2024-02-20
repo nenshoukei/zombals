@@ -66,14 +66,14 @@ export default function DeckList({ sort }: DeckListProps) {
   }
   if (!sortedDecks) return null;
   return (
-    <div className="flex flex-wrap gap-5 justify-between after:w-64 after:h-0 after:block">
+    <div className="flex flex-wrap gap-2 md:gap-5 justify-between after:w-48 md:after:w-64 after:h-0 after:block">
       {sortedDecks.map((deck) => (
-        <div key={deck.id} className={`job-bg-${deck.job} bg-no-repeat bg-cover bg-[-5rem_-0.5rem] rounded-large`}>
-          <Card shadow="md" className="w-64 bg-white/70 bg-blend-lighten dark:bg-black/70 dark:bg-blend-darken">
+        <div key={deck.id} className={`job-bg-${deck.job} bg-no-repeat bg-cover bg-[-2rem_-0.5rem] md:bg-[-5rem_-1.5rem] rounded-large`}>
+          <Card shadow="md" className="w-48 md:w-64 bg-white/70 bg-blend-lighten dark:bg-black/70 dark:bg-blend-darken">
             <CardBody>
               <RouterLink
                 to={`/deck/${deck.id}`}
-                className="text-foreground text-xl font-bold w-56 overflow-hidden whitespace-nowrap text-ellipsis cursor-pointer hover:underline"
+                className="text-foreground md:text-xl font-bold w-40 md:w-56 overflow-hidden whitespace-nowrap text-ellipsis cursor-pointer hover:underline"
               >
                 {deck.name}
               </RouterLink>

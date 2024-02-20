@@ -14,8 +14,8 @@ export default function DeckNew() {
           <DeckEditor job={job} />
         ) : (
           <>
-            <h1 className="text-center text-2xl mt-5">使用する職業を選択</h1>
-            <div className="mt-7 max-w-3xl mx-auto">
+            <h1 className="text-center text-2xl mt-5 hidden md:block">使用する職業を選択</h1>
+            <div className="md:mt-7 md:max-w-3xl mx-auto">
               <JobSelector onSelect={setJob} />
             </div>
           </>

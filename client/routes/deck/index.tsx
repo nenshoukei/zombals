@@ -16,7 +16,7 @@ export default function DeckIndex() {
   return (
     <AppLayout>
       <div className="px-3 pb-3">
-        <div className="flex flex-wrap justify-between items-center mx-5 mt-5 mb-7 gap-2">
+        <div className="flex flex-wrap justify-between items-center mx-5 mt-3 md:mt-5 mb-7 gap-2">
           <div className="min-w-48">
             <DeckListSortSelect
               label="並び順"

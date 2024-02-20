@@ -7,8 +7,8 @@ export type ZoomableCardViewProps = Omit<CardViewProps, 'size'> & {
 };
 
 const sizeDiffMap = {
-  sm: [30, 20],
-  xs: [45, 37],
+  sm: [30, 50],
+  xs: [45, 70],
 };
 
 export default function ZoomableCardView({ size, ...props }: ZoomableCardViewProps) {
@@ -41,19 +41,21 @@ export default function ZoomableCardView({ size, ...props }: ZoomableCardViewPro
       return;
     }
     if (!containerRef.current || !zoomedCardRef.current) return;
+
+    zoomedCardRef.current.style.display = 'block';
+
     const containerRect = containerRef.current.getBoundingClientRect();
     const zoomedCardRect = zoomedCardRef.current.getBoundingClientRect();
-    let top = containerRect.top - sizeDiffMap[size ?? 'sm'][0];
-    let left = containerRect.left - sizeDiffMap[size ?? 'sm'][1];
+    let left = containerRect.left - sizeDiffMap[size ?? 'sm'][0];
+    let top = containerRect.top - sizeDiffMap[size ?? 'sm'][1];
 
-    if (top < 0) top = 0;
     if (left < 0) left = 0;
-    if (top + zoomedCardRect.height > window.innerHeight) top = window.innerHeight - zoomedCardRect.height;
+    if (top < 0) top = 0;
     if (left + zoomedCardRect.width > window.innerWidth) left = window.innerWidth - zoomedCardRect.width;
+    if (top + zoomedCardRect.height > window.innerHeight) top = window.innerHeight - zoomedCardRect.height;
 
-    zoomedCardRef.current.style.top = `${top}px`;
-    zoomedCardRef.current.style.left = `${left}px`;
-    zoomedCardRef.current.style.display = 'block';
+    zoomedCardRef.current.style.left = `${left + window.scrollX}px`;
+    zoomedCardRef.current.style.top = `${top + window.scrollY}px`;
   }, [isZoomed, size]);
 
   return (

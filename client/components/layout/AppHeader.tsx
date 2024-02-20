@@ -54,7 +54,7 @@ export function AppHeader() {
         <NavbarContent justify="end">
           {session ? (
             <NavbarItem>
-              <Dropdown>
+              <Dropdown placement="bottom-end">
                 <DropdownTrigger>
                   <Button variant="flat" startContent={<span className="icon-[mdi--account-circle] text-2xl" />}>
                     {session.name}

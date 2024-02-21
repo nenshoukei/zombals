@@ -33,7 +33,7 @@ export function AppHeader({ darkMode }: AppHeaderProps) {
   const navigate = useNavigate();
 
   return (
-    <header className="flex items-center justify-between p-0 md:p-2">
+    <header className="flex items-center justify-between p-0 lg:p-2">
       {!isLoading && !session ? <WelcomeModal /> : null}
 
       <Navbar className="rounded-lg bg-transparent">
@@ -45,7 +45,7 @@ export function AppHeader({ darkMode }: AppHeaderProps) {
             <MenuItem path="/">ホーム</MenuItem>
           </NavbarItem>
           <NavbarItem>
-            <MenuItem path="/deck">デッキ編集</MenuItem>
+            <MenuItem path="/deck">デッキ</MenuItem>
           </NavbarItem>
           <NavbarItem>
             <MenuItem path="/history">対戦履歴</MenuItem>
@@ -61,7 +61,7 @@ export function AppHeader({ darkMode }: AppHeaderProps) {
             <NavbarItem>
               <Dropdown placement="bottom-end">
                 <DropdownTrigger>
-                  <Button variant="flat" startContent={<span className="icon-[mdi--account-circle] text-2xl hidden md:inline" />}>
+                  <Button variant="flat" startContent={<span className="icon-[mdi--account-circle] text-2xl hidden lg:inline" />}>
                     {session.name}
                   </Button>
                 </DropdownTrigger>

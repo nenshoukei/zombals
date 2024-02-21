@@ -24,7 +24,7 @@ import { regularizeStringForSearch } from '@/utils/string_utils';
 
 export type CardSearchViewProps = {
   job: CardJob;
-  onClickCard?: (cardDefId: number) => void;
+  onPressCard?: (cardDefId: number) => void;
 };
 
 type CardSearchFilter = {
@@ -48,7 +48,7 @@ type SearchOrderValue = (typeof searchOrderOptions)[number][0];
 
 const CARDS_PER_PAGE = 48;
 
-export default function CardSearchView({ job, onClickCard }: CardSearchViewProps) {
+export default function CardSearchView({ job, onPressCard }: CardSearchViewProps) {
   const locale = useCurrentSesionLocale();
   const [filter, setFilter] = useState<CardSearchFilter>({});
   const [order, setOrder] = useState<SearchOrderValue>('cost:asc');
@@ -164,8 +164,12 @@ export default function CardSearchView({ job, onClickCard }: CardSearchViewProps
 
       <div className="flex flex-wrap gap-2 my-4">
         {pageCards.map((card) => (
-          <div key={card.id} className="cursor-pointer" onClick={onClickCard ? () => onClickCard(card.id) : undefined}>
-            <ZoomableCardView cardDefId={card.id} />
+          <div key={card.id}>
+            <ZoomableCardView
+              cardDefId={card.id}
+              isPressable={!!onPressCard}
+              onPress={onPressCard ? () => onPressCard(card.id) : undefined}
+            />
           </div>
         ))}
       </div>

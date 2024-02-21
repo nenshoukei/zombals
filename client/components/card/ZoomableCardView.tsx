@@ -1,28 +1,52 @@
-import { useEffect, useRef, useState } from 'react';
+import { useLongPress } from '@uidotdev/usehooks';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import CardView, { CardViewProps } from '#/components/card/CardView';
 
-export type ZoomableCardViewProps = Omit<CardViewProps, 'size'> & {
-  size?: 'xs' | 'sm';
-};
+const isTouchDevice = 'ontouchstart' in window;
 
-const sizeDiffMap = {
-  sm: [30, 50],
-  xs: [45, 70],
-};
+export type ZoomableCardViewProps = Omit<CardViewProps, 'size'>;
 
-export default function ZoomableCardView({ size, ...props }: ZoomableCardViewProps) {
+export default function ZoomableCardView({ onPress, ...props }: ZoomableCardViewProps) {
   const [isMouseOn, setIsMouseOn] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const zoomedCardRef = useRef<HTMLDivElement>(null);
+  const longPressAttrs = useLongPress(
+    () => {
+      setIsZoomed(true);
+    },
+    {
+      threshold: 500,
+    },
+  );
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = useCallback(() => {
+    if (isTouchDevice) return;
     setIsMouseOn(true);
-  };
-  const handleMouseLeave = () => {
+  }, []);
+  const handleMouseLeave = useCallback(() => {
+    if (isTouchDevice) return;
     setIsMouseOn(false);
-  };
+  }, []);
+
+  const handlePress: Exclude<CardViewProps['onPress'], undefined> = useCallback(
+    (ev) => {
+      if (isZoomed) return;
+      if (onPress) {
+        onPress(ev);
+      } else {
+        setIsZoomed(true);
+      }
+    },
+    [isZoomed, onPress],
+  );
+
+  const handleBackdropTouch = useCallback((ev: React.TouchEvent<HTMLDivElement>) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    setIsZoomed(false);
+  }, []);
 
   useEffect(() => {
     if (!isMouseOn) {
@@ -46,8 +70,15 @@ export default function ZoomableCardView({ size, ...props }: ZoomableCardViewPro
 
     const containerRect = containerRef.current.getBoundingClientRect();
     const zoomedCardRect = zoomedCardRef.current.getBoundingClientRect();
-    let left = containerRect.left - sizeDiffMap[size ?? 'sm'][0];
-    let top = containerRect.top - sizeDiffMap[size ?? 'sm'][1];
+    let left: number;
+    let top: number;
+    if (isTouchDevice) {
+      left = (window.innerWidth - zoomedCardRect.width) / 2;
+      top = (window.innerHeight - zoomedCardRect.height) / 2;
+    } else {
+      left = containerRect.left - (zoomedCardRect.width - containerRect.width) / 2;
+      top = containerRect.top - (zoomedCardRect.height - containerRect.height) / 2;
+    }
 
     if (left < 0) left = 0;
     if (top < 0) top = 0;
@@ -56,17 +87,39 @@ export default function ZoomableCardView({ size, ...props }: ZoomableCardViewPro
 
     zoomedCardRef.current.style.left = `${left + window.scrollX}px`;
     zoomedCardRef.current.style.top = `${top + window.scrollY}px`;
-  }, [isZoomed, size]);
+  }, [isZoomed]);
 
   return (
-    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative" ref={containerRef}>
+    <>
       {createPortal(
-        <div className="absolute z-[60] hidden" ref={zoomedCardRef}>
-          {isMouseOn && <CardView size="md" {...props} />}
-        </div>,
+        <>
+          {(isMouseOn || isZoomed) && (
+            <div key="cardView" className="absolute z-[1001] hidden" onContextMenu={(ev) => ev.preventDefault()} ref={zoomedCardRef}>
+              <CardView
+                size="md"
+                {...props}
+                isPressable={!isTouchDevice && props.isPressable}
+                onPress={isTouchDevice ? undefined : onPress}
+              />
+            </div>
+          )}
+          {isTouchDevice && isZoomed && (
+            <div
+              key="backdrop"
+              onTouchEnd={handleBackdropTouch}
+              onWheel={(ev) => ev.preventDefault()}
+              onContextMenu={(ev) => ev.preventDefault()}
+              className="z-[1000] fixed backdrop-blur-md backdrop-saturate-150 w-screen h-screen inset-0"
+            ></div>
+          )}
+        </>,
         document.body,
       )}
-      <CardView size={size ?? 'sm'} {...props} />
-    </div>
+      <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative" ref={containerRef}>
+        <div {...longPressAttrs}>
+          <CardView size="sm" isPressable onPress={handlePress} {...props} />
+        </div>
+      </div>
+    </>
   );
 }

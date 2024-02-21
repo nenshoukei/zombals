@@ -10,20 +10,22 @@ import { useDeckList } from '#/hooks/useDeckList';
 export default function DeckIndex() {
   const [deckSort, setDeckSort] = useState<DeckListSort | undefined>();
   const [deckCopyModalOpen, setDeckCopyModalOpen] = useState(false);
-  const { isLoading, mutate: reloadDeckList } = useDeckList();
+  const { decks, isLoading, mutate: reloadDeckList } = useDeckList();
 
   if (isLoading) return <PageLoading />;
   return (
     <AppLayout>
       <div className="px-3 pb-3">
-        <div className="flex flex-wrap justify-between items-center mx-5 mt-3 md:mt-5 mb-7 gap-2">
+        <div className="flex flex-wrap justify-between items-center mx-5 mt-3 lg:mt-5 mb-7 gap-2">
           <div className="min-w-48">
-            <DeckListSortSelect
-              label="並び順"
-              size="sm"
-              value={deckSort || ''}
-              onChange={(ev) => setDeckSort(ev.target.value as DeckListSort)}
-            />
+            {decks && decks.length > 0 && (
+              <DeckListSortSelect
+                label="並び順"
+                size="sm"
+                value={deckSort || ''}
+                onChange={(ev) => setDeckSort(ev.target.value as DeckListSort)}
+              />
+            )}
           </div>
 
           <h1 className="text-center text-2xl">デッキリスト</h1>
@@ -47,7 +49,7 @@ export default function DeckIndex() {
           </div>
         </div>
         <div className="flex flex-col items-center mx-5">
-          <DeckList sort={deckSort} />
+          {decks && decks.length > 0 ? <DeckList sort={deckSort} mode="list" /> : <p>まだデッキが作成されていません。</p>}
         </div>
       </div>
 

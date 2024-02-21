@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import RouteErrorPage from '#/components/error-page/RouteErrorPage';
+import BattleEntry from '#/routes/battle/entry';
 import DeckIndex from '#/routes/deck';
 import DeckEdit from '#/routes/deck/edit';
 import DeckNew from '#/routes/deck/new';
@@ -42,6 +43,10 @@ export const router = createBrowserRouter([
       {
         path: '/deck/:deckId',
         element: <DeckEdit />,
+      },
+      {
+        path: '/battle/entry',
+        element: <BattleEntry />,
       },
     ],
   },

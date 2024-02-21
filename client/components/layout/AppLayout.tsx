@@ -19,10 +19,10 @@ export function AppLayout({ size, children }: AppLayoutProps) {
   return (
     <div className="relative">
       <div
-        className={`container mx-0 py-0 md:mx-auto md:py-4 flex flex-col items-center min-h-dvh max-w-full ${size === 'lg' ? 'md:px-16' : 'md:px-1 md:max-w-4xl'}`}
+        className={`container mx-0 py-0 lg:mx-auto lg:py-4 flex flex-col items-center min-h-dvh max-w-full ${size === 'lg' ? 'lg:px-16' : 'lg:px-1 lg:max-w-4xl'}`}
       >
         <div
-          className={`${darkMode.value ? 'dark' : ''} bg-default-50 text-foreground flex flex-col box-border outline-none w-full md:rounded-large shadow-small ${size === 'lg' ? '' : 'my-auto min-h-dvh md:min-h-unit-9xl'}`}
+          className={`${darkMode.value ? 'dark' : ''} bg-default-50 text-foreground flex flex-col box-border outline-none w-full lg:rounded-large shadow-small ${size === 'lg' ? '' : 'my-auto min-h-dvh lg:min-h-unit-9xl'}`}
         >
           <AppHeader darkMode={darkMode} />
           {children}

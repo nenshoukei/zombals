@@ -1,3 +1,4 @@
+import { Card, CardProps } from '@nextui-org/react';
 import { useMemo } from 'react';
 import styles from './CardView.module.css';
 import CardDescription from '#/components/card/CardDescription';
@@ -15,8 +16,8 @@ import {
   WeaponCardDefinition,
 } from '@/types';
 
-export type CardViewProps = {
-  size?: 'xs' | 'sm' | 'md' | 'lg';
+export type CardViewProps = CardProps & {
+  size?: 'sm' | 'md' | 'lg';
   cardDefId: Id;
   description?: LocaleString;
   unitPower?: number;
@@ -35,13 +36,14 @@ export default function CardView({
   weaponPower,
   weaponDurability,
   buildingDurability,
+  ...cardProps
 }: CardViewProps) {
   const locale = useCurrentSesionLocale();
   const def = useMemo(() => cardRegistry.getById(cardDefId), [cardDefId]);
 
   const aSize = size ?? 'md';
   return (
-    <div className={`${styles.container} ${styles[`size-${aSize}`]} ${styles[`job-${def.job}`]}`}>
+    <Card {...cardProps} className={`${cardProps.className} ${styles.container} ${styles[`size-${aSize}`]} ${styles[`job-${def.job}`]}`}>
       <div className={styles.image}>
         <img src={`/assets/card/card-${def.id}.jpg`} alt="" />
       </div>
@@ -77,6 +79,6 @@ export default function CardView({
           </>
         ) : null}
       </div>
-    </div>
+    </Card>
   );
 }

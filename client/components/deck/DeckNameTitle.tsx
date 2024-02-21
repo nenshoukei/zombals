@@ -71,7 +71,7 @@ export default function DeckNameTitle({ deckName, deckId, onUpdate }: DeckNameTi
         </form>
       ) : (
         <>
-          {deckName}
+          {deckName || '新しいデッキ'}
 
           {deckId ? (
             <Button isIconOnly size="sm" className="ml-2" variant="flat" onPress={startNameEdit}>

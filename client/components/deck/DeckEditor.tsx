@@ -38,7 +38,7 @@ export function DeckEditor({ deck, job, onUpdateDeck, onUpdateDeckName }: DeckEd
     });
   }, []);
 
-  const handleClickCard = useCallback((cardDefId: Id) => {
+  const handlePressCard = useCallback((cardDefId: Id) => {
     setCardDefIds((prev) => {
       const def = cardRegistry.getById(cardDefId);
       const count = prev.filter((id) => id === cardDefId).length;
@@ -80,7 +80,7 @@ export function DeckEditor({ deck, job, onUpdateDeck, onUpdateDeckName }: DeckEd
       <div className="px-3 pb-3">
         <div className="flex gap-2 mb-5">
           <section className="flex-grow">
-            <CardSearchView job={job} onClickCard={handleClickCard} />
+            <CardSearchView job={job} onPressCard={handlePressCard} />
           </section>
 
           <DeckEditorRightPane

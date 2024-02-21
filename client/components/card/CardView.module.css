@@ -1,11 +1,14 @@
 .container {
-  border-radius: 0.5rem;
+  border-radius: 5px;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
   position: relative;
   background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 .container.job-0 {
-  background-color: rgb(211, 211, 211);
+  background-color: rgb(231, 231, 231);
 }
 .container.job-1 {
   background-color: #c4e7ff;
@@ -15,49 +18,60 @@
   font-size: 1.2rem;
   width: 250px;
 }
+.size-lg .image {
+  padding: 5px 5px 0 5px;
+  width: 250px;
+  height: 205px;
+}
+
 .size-md {
   font-size: 1rem;
   width: 190px;
 }
+.size-md .image {
+  padding: 5px 5px 0 5px;
+  width: 190px;
+  height: 155px;
+}
+
 .size-sm {
-  font-size: 0.75rem;
-  width: 130px;
+  font-size: 0.4rem;
+  width: 66px;
 }
-.size-xs {
-  font-size: 0.6rem;
-  width: 100px;
+.size-sm .image {
+  padding: 3px 3px 0 3px;
+  width: 66px;
+  height: 53px;
 }
-.size-lg .image img {
-  width: 240px;
-  height: 200px;
-}
-.size-md .image img {
-  width: 180px;
-  height: 150px;
-}
-.size-sm .image img {
-  width: 120px;
-  height: 100px;
-}
-.size-xs .image img {
-  width: 90px;
-  height: 75px;
+
+@media (min-width: 1024px) {
+  .size-sm {
+    font-size: 0.6rem;
+    width: 104px;
+  }
+  .size-sm .image {
+    padding: 4px 4px 0 4px;
+    width: 104px;
+    height: 84px;
+  }
 }
 
 .image {
-  padding: 5px 5px 0 5px;
+  position: relative;
 }
 .image img {
-  border-radius: 0.5rem 0.5rem 0 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px 5px 0 0;
 }
 
 .cost,
 .power,
 .maxhp,
 .durability {
-  width: 1.6em;
+  width: 1.5em;
   color: white;
-  font-size: 1.2em;
+  font-size: 1.75em;
   font-weight: bold;
   text-shadow: 0 0 3px black;
   text-align: center;
@@ -65,7 +79,7 @@
 }
 
 .cost {
-  border-radius: 0.5rem 0 0.5rem 0;
+  border-radius: 5px 0 5px 0;
   background-color: #328dc5;
   position: absolute;
   left: 0;
@@ -108,9 +122,9 @@
   background-color: #3a3f46;
   color: white;
   text-shadow: 0 1px 0 black;
-  min-height: 7.5em;
-  padding: 0.2em 0.2em 1.8em 0.2em;
-  border-radius: 0 0 0.5rem 0.5rem;
+  min-height: 8.3em;
+  padding: 0.2em 0.2em 2.5em 0.2em;
+  border-radius: 0 0 5px 5px;
   word-break: break-all;
   text-align: center;
   line-height: 1.1;
@@ -120,8 +134,7 @@
   justify-content: center;
 }
 
-.size-sm .description p,
-.size-xs .description p {
+.size-sm .description p {
   max-height: 5.5em;
   overflow: hidden;
   display: -webkit-box;

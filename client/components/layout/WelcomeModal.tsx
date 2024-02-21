@@ -66,7 +66,7 @@ export function WelcomeModal() {
       <ModalContent>
         <form onSubmit={isLoginMode ? handleLoginSubmit : handleRegisterSubmit}>
           <ModalHeader className="place-content-center">
-            <div className={`${styles.logo} w-[180px] h-[85px] md:w-[360px] md:h-[170px]`}>ZOMBALS</div>
+            <div className={`${styles.logo} w-[180px] h-[85px] lg:w-[360px] lg:h-[170px]`}>ZOMBALS</div>
           </ModalHeader>
           <ModalBody>
             {isLoginMode ? (

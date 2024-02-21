@@ -51,7 +51,7 @@ export function AppHeader({ darkMode }: AppHeaderProps) {
             <MenuItem path="/history">対戦履歴</MenuItem>
           </NavbarItem>
           <NavbarItem>
-            <Button variant="solid" color="primary" isDisabled={!session?.hasDeck}>
+            <Button as={Link} to="/battle/entry" variant="solid" color="primary">
               対戦する
             </Button>
           </NavbarItem>

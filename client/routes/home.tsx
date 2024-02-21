@@ -2,18 +2,21 @@ import { Button } from '@nextui-org/react';
 import { Link } from 'react-router-dom';
 import styles from './home.module.css';
 import { AppLayout } from '#/components/layout/AppLayout';
-import { useCurrentSession } from '#/hooks/useCurrentSession';
+import { PageLoading } from '#/components/layout/PageLoading';
+import { useDeckList } from '#/hooks/useDeckList';
 
 export default function Home() {
-  const { session } = useCurrentSession();
+  const { isLoading, decks } = useDeckList();
+
+  if (isLoading) return <PageLoading />;
   return (
     <AppLayout>
-      <section className={`${styles.home} grow md:rounded-b-large relative flex flex-col justify-center`}>
+      <section className={`${styles.home} grow lg:rounded-b-large relative flex flex-col justify-center`}>
         <div className="rounded-large backdrop-blur-md backdrop-brightness-50 text-white w-3/5 mt-5 ml-5 p-5">
           <h2 className="text-2xl mb-2">ようこそ ZOMBALS へ</h2>
-          {session?.hasDeck ? (
+          {decks && decks.length ? (
             <>
-              <p>他のデッキを使いたい時は、メニューの「デッキ編集」から 新しいデッキを作成してください。</p>
+              <p>他のデッキを使いたい時は、メニューの「デッキ」から 新しいデッキを作成してください。</p>
             </>
           ) : (
             <>
@@ -24,8 +27,8 @@ export default function Home() {
         </div>
 
         <div className="w-3/5 mt-5 ml-5 flex justify-center">
-          {session?.hasDeck ? (
-            <Button variant="solid" color="primary" className="w-60 text-2xl p-8 shadow-md shadow-gray-700">
+          {decks && decks.length ? (
+            <Button variant="solid" color="primary" className="w-60 text-2xl p-8 shadow-md shadow-gray-700" as={Link} to="/battle/entry">
               対戦する
             </Button>
           ) : (

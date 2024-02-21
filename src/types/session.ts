@@ -6,6 +6,5 @@ export const zSession = z.object({
   name: zUserName,
   loginId: zLoginId.optional(),
   locale: zLocale,
-  hasDeck: z.boolean(),
 });
 export type Session = z.infer<typeof zSession>;

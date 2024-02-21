@@ -1,4 +1,3 @@
-import { useLongPress } from '@uidotdev/usehooks';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import CardView, { CardViewProps } from '#/components/card/CardView';
@@ -12,14 +11,6 @@ export default function ZoomableCardView({ onPress, ...props }: ZoomableCardView
   const [isZoomed, setIsZoomed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const zoomedCardRef = useRef<HTMLDivElement>(null);
-  const longPressAttrs = useLongPress(
-    () => {
-      setIsZoomed(true);
-    },
-    {
-      threshold: 500,
-    },
-  );
 
   const handleMouseEnter = useCallback(() => {
     if (isTouchDevice) return;
@@ -28,6 +19,34 @@ export default function ZoomableCardView({ onPress, ...props }: ZoomableCardView
   const handleMouseLeave = useCallback(() => {
     if (isTouchDevice) return;
     setIsMouseOn(false);
+  }, []);
+
+  const [touchStarted, setTouchStarted] = useState(false);
+  const touchStartPos = useRef({ x: 0, y: 0 });
+  const touchCurrentPos = useRef({ x: 0, y: 0 });
+  const handleTouchStart = useCallback((ev: React.TouchEvent<HTMLDivElement>) => {
+    setTouchStarted(true);
+    touchStartPos.current = { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
+    touchCurrentPos.current = { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
+  }, []);
+  useEffect(() => {
+    if (!touchStarted) return;
+    const timer = setTimeout(() => {
+      setTouchStarted(false);
+      if (
+        Math.abs(touchStartPos.current.x - touchCurrentPos.current.x) < 10 &&
+        Math.abs(touchStartPos.current.y - touchCurrentPos.current.y) < 10
+      ) {
+        setIsZoomed(true);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [touchStarted]);
+  const handleTouchMove = useCallback((ev: React.TouchEvent<HTMLDivElement>) => {
+    touchCurrentPos.current = { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
+  }, []);
+  const handleTouchEnd = useCallback(() => {
+    setTouchStarted(false);
   }, []);
 
   const handlePress: Exclude<CardViewProps['onPress'], undefined> = useCallback(
@@ -90,7 +109,10 @@ export default function ZoomableCardView({ onPress, ...props }: ZoomableCardView
   }, [isZoomed]);
 
   return (
-    <>
+    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative" ref={containerRef}>
+      <div onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd}>
+        <CardView size="sm" isPressable onPress={handlePress} {...props} />
+      </div>
       {createPortal(
         <>
           {(isMouseOn || isZoomed) && (
@@ -115,11 +137,6 @@ export default function ZoomableCardView({ onPress, ...props }: ZoomableCardView
         </>,
         document.body,
       )}
-      <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative" ref={containerRef}>
-        <div {...longPressAttrs}>
-          <CardView size="sm" isPressable onPress={handlePress} {...props} />
-        </div>
-      </div>
-    </>
+    </div>
   );
 }
